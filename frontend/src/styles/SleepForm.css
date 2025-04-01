@@ -1,0 +1,202 @@
+/* Updated SleepForm.css */
+
+.sleep-form-layout-grid {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 8px;
+}
+
+.sleep-form, .sleep-analysis-card {
+  width: 450px;
+  background: linear-gradient(to right, #cfdfff, #e6f0ff);
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(128, 160, 255, 0.2);
+  font-family: 'Segoe UI', sans-serif;
+  color: #324e7b;
+  min-height: 400px;
+
+}
+
+.sleep-form h3, .sleep-analysis-card h4 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  color: #1b176f;
+}
+
+.sleep-form label {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.sleep-form input,
+.input-box,
+.dream-select,
+.react-datepicker-wrapper {
+  width: 300px;
+  /* padding: 8px 12px; */
+  border: 1px solid #d3ddeb;
+  border-radius: 10px;
+  background-color: #81b4ef;
+  font-size: 1rem;
+  box-sizing: border-box;
+  margin-bottom: 3px;
+  color: rgb(85, 95, 159);
+}
+
+.react-datepicker-wrapper {
+  width: 100% !important;
+}
+
+.sleep-form button {
+  margin-top: 10px;
+  background-color: #82aaff;
+  color: rgb(103, 150, 204);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sleep-form button:hover {
+  background-color: #5c8eff;
+}
+
+.sleep-analysis-card p {
+  margin: 6px 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-ring {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+}
+
+.score-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #3a5ea7;
+}
+
+.great-score .score-text {
+  color: #ff69b4;
+  font-family: "Comic Sans MS", cursive;
+}
+
+.good-score .score-text {
+  color: #4a90e2;
+}
+
+.low-score .score-text {
+  color: #ff6f61;
+}
+
+/* Optional: Remove extra margin in empty analysis */
+.sleep-analysis-card > p:first-of-type {
+  margin-top: 0;
+}
+
+/* Rounded corners & coloring for picker */
+.react-datepicker {
+  border-radius: 20%;
+  background-color: #c1c0eb;
+  font-family: 'Comic Sans MS', cursive;
+  border: 1px solid #7677cf;
+}
+
+.react-datepicker__navigation {
+  top: 10px;
+  border-radius: 20%;
+}
+
+.react-datepicker__navigation--next {
+  border-left-color: #a2a0f3;
+}
+
+.react-datepicker__navigation--previous {
+  border-right-color: #acc1e7;
+}
+
+.react-datepicker__current-month {
+  color: #90abf5;
+  font-weight: bold;
+}
+
+.react-datepicker__day-name {
+  color: #7daaff;
+}
+
+.react-datepicker__day {
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day:hover {
+  background-color: #959bf0;
+  color: rgb(53, 72, 178);
+  border-radius: 20%;
+}
+
+.react-datepicker__time-container {
+  border-left: 1px solid #91baf0;
+  border-radius: 20%;
+}
+
+.react-datepicker__time {
+  background-color: #5baaeb;
+}
+
+.react-datepicker__time-list-item {
+  border-radius: 5px;
+  margin: 2px;
+}
+
+.react-datepicker__time-list-item--selected {
+  background-color: #2375b8;
+  border-radius: 20%;
+  color: rgb(167, 116, 240);
+}
+.score-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(120, 170, 255, 0.3);
+  background: radial-gradient(circle, #f0f4ff 30%, #e4edff 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(173, 216, 230, 0.5); }
+  50% { box-shadow: 0 0 18px rgba(173, 216, 230, 0.9); }
+}
+
+.score-text {
+  position: absolute;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #444;
+  font-family: "Comic Sans MS", cursive;
+}

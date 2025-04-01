@@ -1,0 +1,30 @@
+.sleep-chart {
+    background: linear-gradient(to right, #dce9ff, #f0f6ff);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(100, 140, 255, 0.15);
+    color: #314d70;
+  }
+  
+  .sleep-chart h3 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+  }
+  
+  .sleep-chart .health-advice {
+    margin-top: 20px;
+  }
+  
+  .sleep-chart .health-advice h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  
+  .sleep-chart .health-advice ul {
+    padding-left: 20px;
+  }
+  
+  .sleep-chart .health-advice li {
+    margin-bottom: 6px;
+  }
+  

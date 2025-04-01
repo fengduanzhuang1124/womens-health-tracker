@@ -1,0 +1,155 @@
+.profile {
+    background: #f8c8dc;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(255, 182, 193, 0.4);
+    font-family: 'Comic Sans MS', 'Segoe UI', cursive;
+  }
+  
+  .health-nav {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .health-nav button {
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    background: #ff69b4;
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .health-nav button.active {
+    background: #d14792;
+    box-shadow: 0 2px 6px rgba(255, 105, 180, 0.4);
+  }
+  
+  .health-section {
+    background: white;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .health-advice {
+    margin-top: 10px;
+  }
+  
+  .health-advice h4 {
+    color: #ff69b4;
+  }
+  
+  .health-advice ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .health-advice li {
+    background: #f9f9f9;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+  }
+  /* .profile-info {
+    position: fixed;
+    top: 80px; 
+    right: 20px; 
+    width: 220px;
+     background-color: rgba(240, 205, 228, 0.968); 
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    text-align: center;
+  } */
+  
+  .profile-info img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-top: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-info {
+      position: static;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+  }
+
+.menstrual-theme {
+  background-color: #f8c8dc; 
+}
+.sleep-theme {
+  background-color: #cce4f7; 
+}
+.weight-theme {
+  background-color: #fff2b2; 
+}
+
+/* Navigation button color uniform change */
+.menstrual-theme .health-nav button {
+  background: #f06292;
+}
+.sleep-theme .health-nav button {
+  background: #64b5f6;
+}
+.weight-theme .health-nav button {
+  background: #fbc02d;
+}
+
+.menstrual-theme .health-nav button.active {
+  background: #d81b60;
+}
+.sleep-theme .health-nav button.active {
+  background: #2196f3;
+}
+.weight-theme .health-nav button.active {
+  background: #e6a640e3;
+}
+
+
+.menstrual-theme .health-advice h4 {
+  color: #d81b60;
+}
+.sleep-theme .health-advice h4 {
+  color: #1565c0;
+}
+.weight-theme .health-advice h4 {
+  color: #ef6c00;
+}
+
+.profile-info {
+  position: fixed;
+  top: 80px; 
+  right: 20px; 
+  width: 220px;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  text-align: center;
+  transition: background-color 0.5s ease;
+}
+
+
+.profile-info.menstrual-theme {
+  background-color: #f8c8dc; 
+}
+
+.profile-info.sleep-theme {
+  background-color: #cce4f7; 
+}
+
+.profile-info.weight-theme {
+  background-color: #fff2b2; 
+}

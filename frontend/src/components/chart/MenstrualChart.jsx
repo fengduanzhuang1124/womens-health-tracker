@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { durationAdvice, cycleAdvice } from "../../data/menstrualAdvice";
-
+import { getGPTAdvice } from "../utils/getCPTAdvice";
 import {
   LineChart,
   Line,
@@ -61,6 +61,13 @@ const MenstrualChart = ({ data }) => {
 
   const allTips = [...durationTips, ...cycleTips];
 
+  const [aiAdvice, setAiAdvice]= useState("Generating AI suggestion.....")
+    useEffect(()=>{
+      if(validData.length>0){
+        getGPTAdvice(avgCycleLength,averageDuration).then(setAiAdvice);
+      }
+    },[avgCycleLength,averageDuration])
+
   return (
     <div className="health-section">
       <h3>📊 Menstrual Duration Trends</h3>
@@ -80,6 +87,7 @@ const MenstrualChart = ({ data }) => {
       </ResponsiveContainer>
 
       <div className="health-advice">
+        <div>
         <h4>💡 Health Tips</h4>
         <ul>
         <li>Average period duration: {averageDuration} days</li>
@@ -88,6 +96,14 @@ const MenstrualChart = ({ data }) => {
             <li key={idx}>{tip}</li>
           ))}
 </ul>
+        </div>
+       <div>
+       <h4>🤖 AI Suggestion</h4>
+        <ul>
+        
+          <li>{aiAdvice}</li>
+</ul>
+       </div>
 
       </div>
     </div>

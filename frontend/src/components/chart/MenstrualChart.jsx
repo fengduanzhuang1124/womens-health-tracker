@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { durationAdvice, cycleAdvice } from "../../data/menstrualAdvice";
 import { getGPTAdvice } from "../utils/getCPTAdvice";
+
 import {
   LineChart,
   Line,
@@ -11,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const MenstrualChart = ({ data }) => {
+const MenstrualChart = ({ data, avgCycleLength  }) => {
 
  
   const validData = Array.isArray(data)
@@ -49,10 +50,10 @@ const MenstrualChart = ({ data }) => {
     totalCycleGap += gap;
   }
 
-  const avgCycleLength =
-  Math.round(
-    validData.reduce((sum, d) => sum + (d.cycleLength || 28), 0) / validData.length
-  );
+  // const avgCycleLength =
+  // Math.round(
+  //   validData.reduce((sum, d) => sum + (d.cycleLength || 28), 0) / validData.length
+  // );
   // get health information
   const durationTips =
     durationAdvice.find((d) => d.condition(averageDuration))?.tips || [];
@@ -62,12 +63,12 @@ const MenstrualChart = ({ data }) => {
   const allTips = [...durationTips, ...cycleTips];
 
   const [aiAdvice, setAiAdvice]= useState("Generating AI suggestion.....")
-    useEffect(()=>{
-      if(validData.length>0){
-        getGPTAdvice(avgCycleLength,averageDuration).then(setAiAdvice);
+ 
+    useEffect(() => {
+      if (validData.length > 0) {
+        getGPTAdvice(avgCycleLength, averageDuration).then(setAiAdvice);
       }
-    },[avgCycleLength,averageDuration])
-
+    }, [avgCycleLength, averageDuration]);
   return (
     <div className="health-section">
       <h3>📊 Menstrual Duration Trends</h3>
@@ -85,28 +86,24 @@ const MenstrualChart = ({ data }) => {
           />
         </LineChart>
       </ResponsiveContainer>
+      <div className="health-advice-row">
+  <div className="health-tips">
+    <h4>💡 Health Tips</h4>
+    <ul>
+      <li>Average period duration: {averageDuration} days</li>
+      <li>Average cycle length: {avgCycleLength} days</li>
+      {allTips.map((tip, idx) => (
+        <li key={idx}>{tip}</li>
+      ))}
+    </ul>
+  </div>
 
-      <div className="health-advice">
-        <div>
-        <h4>💡 Health Tips</h4>
-        <ul>
-        <li>Average period duration: {averageDuration} days</li>
-          <li>Average cycle length: {avgCycleLength} days</li>
-          {allTips.map((tip, idx) => (
-            <li key={idx}>{tip}</li>
-          ))}
-</ul>
-        </div>
-       <div>
-       <h4>🤖 AI Suggestion</h4>
-        <ul>
-        
-          <li>{aiAdvice}</li>
-</ul>
-       </div>
-
-      </div>
-    </div>
+  <div className="ai-suggestion">
+    <h4>🤖 AI Suggestion</h4>
+    <p>{aiAdvice}</p>
+  </div>
+</div>
+</div>
   );
 };
 

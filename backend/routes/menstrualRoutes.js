@@ -5,16 +5,16 @@ import {
   getMenstrualRecords,
   deleteMenstrualRecord,
 } from "../controllers/menstrualController.js";
-
+import { verifyToken } from "../middleware/auth.js";
 const router = express.Router();
 
 
-router.post("/", addMenstrualData);
+router.post("/",verifyToken,addMenstrualData);
 
 
-router.get("/:uid", getMenstrualRecords);
+router.get("/me",verifyToken,getMenstrualRecords);
 
 
-router.delete("/:uid/:recordId", deleteMenstrualRecord);
+router.delete("/:recordId",verifyToken,deleteMenstrualRecord);
 
 export default router;

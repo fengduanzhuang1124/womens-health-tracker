@@ -200,3 +200,120 @@
   color: #444;
   font-family: "Comic Sans MS", cursive;
 }
+
+
+.ai-advice-box {
+  background: linear-gradient(to bottom, #dbeeff, #f0f8ff); /* 更柔和梦幻蓝渐变 */
+  border-left: 5px solid #64b5f6;
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(100, 181, 246, 0.2);
+  margin-top: 18px;
+  font-family: "Segoe UI", sans-serif;
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.ai-advice-box::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ai-advice-box::-webkit-scrollbar-thumb {
+  background-color: #a0c8f0;
+  border-radius: 8px;
+}
+
+.ai-advice-box h5 {
+  color: #1976d2;
+  font-size: 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-advice-box p {
+  color: #37474f;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 6px;
+  text-indent: 1em;
+}
+.sleep-analysis-card {
+  min-height: 430px;
+}
+.bouncing-icon {
+  display: inline-block;
+  animation: bounce 1.2s infinite ease-in-out;
+  transform-origin: bottom;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes fadeBounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03) translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes emojiWiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(8deg);
+  }
+  75% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.duplicate-warning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 18px;
+  background: linear-gradient(120deg, #d6ecff, #eef7ff);
+  border-left: 6px solid #91c9ff;
+  color: #2b5d87;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: "Segoe UI", sans-serif;
+  box-shadow: 0 3px 8px rgba(173, 216, 230, 0.4);
+  animation: fadeBounceIn 0.6s ease, softPulse 4s ease-in-out infinite;
+}
+
+.duplicate-warning .emoji {
+  display: inline-block;
+  animation: emojiWiggle 1.2s infinite ease-in-out;
+  font-size: 1.3rem;
+}

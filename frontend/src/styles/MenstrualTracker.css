@@ -273,3 +273,44 @@
 .period-btn {
   animation: floatUpDown 2s ease-in-out infinite;
 }
+
+.health-advice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 20px;
+  gap: 20px;
+}
+
+.health-tips,
+.ai-suggestion {
+  flex: 1;
+  background: #fff0f7;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255, 153, 204, 0.2);
+}
+
+.health-tips h4,
+.ai-suggestion h4 {
+  color: #d81b60;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.health-tips ul {
+  padding-left: 20px;
+}
+
+.health-tips li {
+  color: #f06292;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.ai-suggestion p {
+  color: #ec407a;
+  line-height: 1.6;
+  text-align: left;
+  white-space: pre-line;
+}

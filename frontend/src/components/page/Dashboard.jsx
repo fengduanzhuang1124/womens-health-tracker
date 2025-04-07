@@ -51,9 +51,9 @@ useEffect(() => {
           </div>
 
           <div className="content">
-            {activeTab === "menstrual" && <MenstrualTracker userId={user.uid} />}
-            {activeTab === "sleep" && <SleepTracker userId={user.uid} />}
-            {activeTab === "weight" && <WeightTracker userId={user.uid} />}
+            {activeTab === "menstrual" && <MenstrualTracker />}
+            {activeTab === "sleep" && <SleepTracker showChart={false} />}
+            {activeTab === "weight" && <WeightTracker />}
             {activeTab === "profile" && <Profile themeColor={effectiveTheme} setProfileTab={setProfileTab} />}
           </div>
 

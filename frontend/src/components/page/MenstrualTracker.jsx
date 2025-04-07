@@ -10,10 +10,12 @@ import moment from "moment";
 import cute from "../../assets/cute.png";
 import moon from "../../assets/moon.png";
 import catsmeil from "../../assets/catsmeil.png";
+
+
 moment.locale("en-gb");
 
 
-const MenstrualTracker = ({ userId }) => {
+const MenstrualTracker = ({}) => {
   
 
   const [nextPeriodDays, setNextPeriodDays] = useState(null);
@@ -30,20 +32,19 @@ const MenstrualTracker = ({ userId }) => {
   
   // Get data when the component loads
   useEffect(() => {
-    console.log("userId changed:", userId);
-    if (!userId) return;
-    fetchMenstrualData();
-  }, [userId]);
+    fetchMenstrualData()
+  }, []);
   
   // get data from Firestore 
   const fetchMenstrualData = async () => {
 
       try {
-        const res = await API.get(`/api/menstrual/${userId}`);
-        console.log("Fetched data:", res.data);
+        // const res = await API.get(`/api/menstrual/${userId}`);
+        // console.log("Fetched data:", res.data);
+        // const { data, calendarData, nextPeriodDays, cycleLength } = res.data;
+        // console.log("Fetched data:", res.data);
+        const res = await API.get("/api/menstrual/me");
         const { data, calendarData, nextPeriodDays, cycleLength } = res.data;
-        console.log("Fetched data:", res.data);
-
     
         setPeriodHistory(data);
         setCalendarData(calendarData);
@@ -58,6 +59,7 @@ const MenstrualTracker = ({ userId }) => {
             day: "numeric",
           }),
           duration: period.duration || 0,
+          cycleLength: period.cycleLength || cycleLength,
         }));
         setChartData(chartPoints);
     
@@ -87,15 +89,16 @@ const MenstrualTracker = ({ userId }) => {
       alert("End date cannot be earlier than start date!");
       return;
     }
+  
     try {
       // Call the backend interface (example: POST /api/menstrualData）
-      await  API.post("/api/menstrual", {
-        userId,
+      await API.post("/api/menstrual", {
         startDate: tempStartDate,
         endDate: selectedDate,
-        flowIntensity: "medium", // Here users can choose
-        symptoms: []
+        flowIntensity: "medium",
+        symptoms: [],
       });
+   
       alert("Period data saved!");
       setTempStartDate(null); 
       // Retrieve data
@@ -113,7 +116,10 @@ const MenstrualTracker = ({ userId }) => {
     if (!confirmDelete) return;
 
     try {
-      await API.delete(`/api/menstrual/${userId}/${recordId}`);
+
+      // await API.delete(`/api/menstrual/${userId}/${recordId}`);
+  
+      await API.delete(`/api/menstrual/${recordId}`);
       alert("Menstrual record deleted!");
       fetchMenstrualData(); // Refresh UI
   } catch (error) {

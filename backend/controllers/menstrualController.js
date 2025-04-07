@@ -5,8 +5,9 @@ import { Timestamp } from "firebase-admin/firestore";
 // record period
 export const addMenstrualData = async (req, res) => {
   try {
-    const { userId, startDate, endDate, flowIntensity, symptoms } = req.body;
-    const userRef = db.collection("users").doc(userId).collection("menstrualData");
+    const uid = req.user.uid;
+    const {  startDate, endDate, flowIntensity, symptoms } = req.body;
+    const userRef = db.collection("users").doc(uid).collection("menstrualData");
 
     let cycleLength = 28; // Default cycle
     const previous = await userRef.orderBy("startDate", "desc").limit(1).get();
@@ -37,7 +38,7 @@ export const addMenstrualData = async (req, res) => {
 
 export const getMenstrualRecords = async (req, res) => {
   try {
-    const uid = req.params.uid;
+    const uid = req.user.uid;
    // console.log("[GET] menstrual records for:", uid);
     const ref = db.collection("users").doc(uid).collection("menstrualData");
     const snapshot = await ref.orderBy("startDate", "desc").get();
@@ -136,7 +137,8 @@ export const getMenstrualRecords = async (req, res) => {
 // deleterecord
 export const deleteMenstrualRecord = async (req, res) => {
   try {
-    const { uid, recordId } = req.params;
+    const uid = req.user.uid;
+    const { recordId } = req.params;
     const recordRef = db.collection("users").doc(uid).collection("menstrualData").doc(recordId);
     const recordDoc = await recordRef.get();
 

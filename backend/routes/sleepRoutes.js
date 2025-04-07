@@ -1,9 +1,9 @@
 import express from "express";
-import { addSleepRecord, getSleepRecords } from "../controllers/SleepController.js";
-
+import { addSleepRecord, getSleepRecords, deleteSleepRecordById } from "../controllers/SleepController.js";
+import { verifyToken } from "../middleware/auth.js";
 const router = express.Router();
 
-router.post("/", addSleepRecord);
-router.get("/:uid", getSleepRecords);
-
+router.post("/",verifyToken, addSleepRecord);
+router.get("/me", verifyToken, getSleepRecords);
+router.delete("/:docId", verifyToken, deleteSleepRecordById); 
 export default router;

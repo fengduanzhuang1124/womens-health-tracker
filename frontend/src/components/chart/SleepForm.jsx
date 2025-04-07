@@ -1,5 +1,5 @@
 // SleepForm.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import API from "../../api";
 import DatePicker, { registerLocale } from "react-datepicker";
 import enGB from "date-fns/locale/en-GB";
@@ -8,7 +8,7 @@ import "../../styles/SleepForm.css";
 import { PieChart, Pie, Cell } from "recharts";
 registerLocale("en-GB", enGB);
 
-const SleepForm = ({ userId, onSuccess }) => {
+const SleepForm = ({ onSuccess }) => {
   const [sleepTime, setSleepTime] = useState("");
   const [wakeTime, setWakeTime] = useState("");
   const [wakeCount, setWakeCount] = useState(0);
@@ -16,14 +16,18 @@ const SleepForm = ({ userId, onSuccess }) => {
   const [dreaming, setDreaming] = useState("no");
   const [sleepLatency, setSleepLatency] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isDuplicateDate, setIsDuplicateDate] = useState(false);
+  const [invalidTimeRange, setInvalidTimeRange] = useState(false);
+
   const [analysis, setAnalysis] = useState(() => {
     const saved = localStorage.getItem("sleep_analysis");
     return saved ? JSON.parse(saved) : null;
   });
+  const [aiAdvice, setAiAdvice] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!userId || !sleepTime || !wakeTime) {
+    if (!sleepTime || !wakeTime) {
       alert("Please fill in all required fields");
       return;
     }
@@ -35,9 +39,13 @@ const SleepForm = ({ userId, onSuccess }) => {
     const deepSleep = Math.max(1.2, duration * 0.2);
     const effectiveSleep = Math.max(0, duration - wakeCount * 0.15 - sleepLatency / 60);
     const deepRatio = duration > 0 ? ((deepSleep / duration) * 100).toFixed(1) : 0;
-    const sleepScore = Math.max(0, Math.min(100,
-      100 - wakeCount * 5 - sleepLatency * 0.5 - (dreaming === "yes" ? 3 : 0)
-    ));
+    const sleepScore = Math.max(
+      0,
+      Math.min(
+        100,
+        100 - wakeCount * 5 - sleepLatency * 0.5 - (dreaming === "yes" ? 3 : 0)
+      )
+    );
 
     const newAnalysis = {
       duration,
@@ -53,10 +61,26 @@ const SleepForm = ({ userId, onSuccess }) => {
     setAnalysis(newAnalysis);
     localStorage.setItem("sleep_analysis", JSON.stringify(newAnalysis));
 
+    try {
+      const res = await API.post("/api/ai/sleep/daily", {
+        duration,
+        deepSleep,
+        effectiveSleep,
+        latency: sleepLatency,
+        wakeCount,
+        dreaming,
+        activity,
+      });
+      console.log("AI returned:", res.data); 
+      setAiAdvice(res.data.advice);
+    } catch (err) {
+      setAiAdvice("⚠️ Failed to load AI suggestion.");
+      console.error("AI advice error:", err);
+    }
+
     setLoading(true);
     try {
       await API.post("/api/sleep", {
-        userId,
         sleepTime: sleep.toISOString(),
         wakeTime: wake.toISOString(),
         wakeCount: parseInt(wakeCount, 10),
@@ -101,18 +125,61 @@ const SleepForm = ({ userId, onSuccess }) => {
         <label>Sleep Time:</label>
         <DatePicker
           selected={sleepTime}
-          onChange={(date) => setSleepTime(date)}
+          
+          onChange={async (date) => 
+          {
+            setSleepTime(date);
+            if (date) {
+              const formattedDate = date.toISOString().split("T")[0];
+              try {
+                const res = await API.get("/api/sleep/me");
+                const exists = res.data.some(record => record.date === formattedDate);
+                setIsDuplicateDate(exists);
+                if (exists) {
+                  console.log("Duplicate sleep date selected.");
+                }
+              } catch (err) {
+                console.error("Failed to check existing sleep records", err);
+              }
+            }
+            if(wakeTime && date && wakeTime<date){
+              setInvalidTimeRange(true);
+            }else{
+              setInvalidTimeRange(false);
+            }
+          }}
           showTimeSelect
           timeIntervals={1}
           dateFormat="Pp"
           placeholderText="Select sleep time"
           locale="en-GB"
         />
-
+  
+{isDuplicateDate && (
+  <div className="duplicate-warning">
+    <span className="emoji">😴💤</span>
+    You’ve already added a sleep record for this date.
+  </div>
+)}
+{invalidTimeRange && (
+  <div className="duplicate-warning">
+    <span className="emoji">⏰</span>
+    Wake time cannot be earlier than sleep time.
+  </div>
+)}
         <label>Wake Time:</label>
         <DatePicker
           selected={wakeTime}
-          onChange={(date) => setWakeTime(date)}
+          onChange={(date) => {
+            setWakeTime(date)
+            if (sleepTime && date < sleepTime) {
+              setInvalidTimeRange(true);
+            } else {
+              setInvalidTimeRange(false);
+            }
+ 
+          }}
+
           showTimeSelect
           timeIntervals={1}
           dateFormat="Pp"
@@ -157,7 +224,7 @@ const SleepForm = ({ userId, onSuccess }) => {
           <option value="yes">Yes</option>
         </select>
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading  || isDuplicateDate || invalidTimeRange}>
           {loading ? "Saving..." : "Save Record"}
         </button>
       </form>
@@ -195,6 +262,15 @@ const SleepForm = ({ userId, onSuccess }) => {
               <p><strong>⏱️ Sleep Latency:</strong> {analysis.sleepLatency} min</p>
               <p><strong>😴 Dreamed:</strong> {analysis.dreaming === "yes" ? "Yes" : "No"}</p>
             </div>
+            {aiAdvice && (
+  <div className="ai-advice-box">
+  <h5><span className="bouncing-icon">🤖</span> AI Suggestion</h5>
+    {aiAdvice.split('\n').map((line, idx) => (
+      <p key={idx}>{line}</p>
+    ))}
+  </div>
+)}
+
           </>
         ) : (
           <p>Fill in the form and submit to get your sleep report.</p>

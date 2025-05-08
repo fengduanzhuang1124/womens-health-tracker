@@ -1,0 +1,779 @@
+/* Main container */
+.wt-container {
+  padding: 10px;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff9c4;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 650px; /* Limit overall height */
+  overflow-y: auto;
+}
+
+/* New compact food tracking styles */
+.wt-container .wt-food-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 500;
+  margin-bottom: 1px;
+}
+
+.wt-container .wt-health-tag {
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: white;
+}
+
+.wt-container .wt-nutrition-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.wt-container .wt-nutrition-compact span {
+  background-color: #f5f5f5;
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.wt-container .wt-food-list {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* Header section */
+.wt-header {
+  margin-bottom: 10px;
+}
+
+/* View toggle */
+.wt-container .wt-view-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.wt-container .wt-toggle-btn {
+  padding: 8px 20px;
+  margin: 0 8px;
+  border: none;
+  background: #f5f5f5;
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: 500;
+  color: #795548;
+  transition: all 0.3s ease;
+}
+
+.wt-container .wt-toggle-btn.wt-active {
+  background: #ffd54f;
+  color: #5d4037;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.wt-container .wt-toggle-btn:hover {
+  background: #ffe082;
+}
+
+/* Two-column layout */
+.wt-container .wt-content-layout {
+  display: flex;
+  gap: 10px;
+  height: 500px; /* Fixed height for content */
+}
+
+.wt-container .wt-main-panel {
+  flex: 2; /* Take more space */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wt-container .wt-side-panel {
+  flex: 1; /* Take less space */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+}
+
+/* Cards */
+.wt-container .wt-stats-card, 
+.wt-container .wt-chart-section, 
+.wt-container .wt-input-row, 
+.wt-container .wt-food-card, 
+.wt-container .wt-advice-card,
+.wt-container .wt-weight-records {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border: 1px solid #ffe082;
+}
+
+.wt-container .wt-chart-section {
+  height: 250px; /* Fixed height for chart */
+  overflow: hidden;
+}
+
+.wt-container .wt-card-title {
+  color: #795548;
+  margin-top: 0;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  font-size: 16px;
+  text-align: center;
+  border-bottom: 2px solid #ffd54f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stats row styles */
+.wt-container .wt-stats-compact-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+.wt-container .wt-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  width: 18%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.wt-container .wt-stat-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background: #fff8e1;
+}
+
+.wt-container .wt-stat-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.wt-container .wt-stat-label {
+  font-size: 11px;
+  color: #795548;
+  margin-bottom: 2px;
+}
+
+.wt-container .wt-stat-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #5d4037;
+}
+
+/* Input forms styles */
+.wt-container .wt-input-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wt-container .wt-form-group {
+  flex: 1;
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.wt-container .wt-toggle-history {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.wt-container .wt-form-group:hover {
+  background: #fff8e1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.wt-container .wt-form-group h4 {
+  color: #795548;
+  margin-top: 0;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.wt-container .wt-form {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.wt-container .wt-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: #fbf99c;
+  color: #ff8c00; /* Orange text */
+  min-width: 70px;
+  font-size: 13px;
+}
+
+.wt-container .wt-input::placeholder {
+  color: #e9b456; /* Lighter orange for placeholder text */
+  opacity: 0.7;
+}
+
+.wt-container .wt-input:focus {
+  border-color: #ffd54f;
+  box-shadow: 0 0 5px rgba(255, 213, 79, 0.5);
+  outline: none;
+}
+
+.wt-container .wt-button {
+  padding: 6px 10px;
+  background: #ffd54f;
+  color: #5d4037;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.wt-container .wt-button:hover {
+  background: #ffca28;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.wt-container .wt-save-btn {
+  background: linear-gradient(45deg, #4caf50, #8bc34a);
+  color: white;
+}
+
+.wt-container .wt-save-btn:hover {
+  background: linear-gradient(45deg, #388e3c, #689f38);
+}
+
+.wt-container .wt-goal-btn {
+  background: linear-gradient(45deg, #2196f3, #03a9f4);
+  color: white;
+}
+
+.wt-container .wt-goal-btn:hover {
+  background: linear-gradient(45deg, #1976d2, #039be5);
+}
+
+.wt-container .wt-history-btn {
+  background: linear-gradient(45deg, #9575cd, #7e57c2);
+  color: white;
+}
+
+.wt-container .wt-history-btn:hover {
+  background: linear-gradient(45deg, #673ab7, #5e35b1);
+}
+
+.wt-container .wt-food-btn {
+  background: linear-gradient(45deg, #ff9800, #ffb74d);
+  color: white;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.wt-container .wt-food-btn:hover {
+  background: linear-gradient(45deg, #f57c00, #ffa726);
+}
+
+/* Food tracking styles */
+.wt-container .wt-food-card,
+.wt-container .wt-advice-card {
+  display: flex;
+  flex-direction: column;
+  height: calc(50% - 5px);
+  overflow: hidden;
+}
+
+.wt-container .wt-food-list {
+  margin-bottom: 5px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* Food item styles */
+.wt-container .wt-food-item {
+  padding: 2px 4px;
+  margin-bottom: 2px;
+  border-left: 2px solid #ffd54f;
+  background: #f9f9f9;
+}
+
+.wt-container .wt-food-item:hover {
+  background: #fff8e1;
+  transform: translateX(2px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.wt-container .wt-food-name {
+  font-size: 13px;
+  margin: 0 0 4px 0;
+  color: #5d4037;
+  font-weight: 500;
+}
+
+/* Nutrition grid layout */
+.wt-container .wt-nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.wt-container .wt-nutrition-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+}
+
+.wt-container .wt-calories {
+  grid-column: 1 / -1;
+  background-color: #fff3cd;
+  font-weight: 500;
+  padding: 3px 4px;
+}
+
+.wt-container .wt-nutrition-label {
+  color: #795548;
+  font-size: 10px;
+}
+
+.wt-container .wt-nutrition-value {
+  font-weight: 500;
+  color: #5d4037;
+  font-size: 10px;
+}
+
+/* Health indicator styles */
+.wt-container .wt-health-indicator {
+  text-align: center;
+  padding: 2px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.wt-container .wt-healthy {
+  color: white;
+  background-color: #4caf50;
+}
+
+.wt-container .wt-unhealthy {
+  color: white;
+  background-color: #ff5722;
+}
+
+.wt-container .wt-total-calories {
+  padding: 2px 4px;
+  margin-top: 2px;
+  font-size: 10px;
+  text-align: right;
+}
+
+.wt-container .wt-food-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.wt-container .wt-food-entries {
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 5px;
+  border: 1px dashed #ffd54f;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.wt-container .wt-food-entries h5 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #795548;
+  font-size: 13px;
+}
+
+.wt-container .wt-entry-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wt-container .wt-entry-item {
+  padding: 4px 0;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+}
+
+.wt-container .wt-entry-actions {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.wt-container .wt-cancel-btn {
+  background: linear-gradient(45deg, #f44336, #ff5252);
+  color: white;
+}
+
+.wt-container .wt-cancel-btn:hover {
+  background: linear-gradient(45deg, #d32f2f, #ff1744);
+}
+
+.wt-container .wt-no-data {
+  text-align: center;
+  color: #757575;
+  font-style: italic;
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* AI advice */
+.wt-container .wt-advice-content {
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border-left: 3px solid #ffd54f;
+  flex: 1;
+  overflow-y: auto;
+  font-size: 13px;
+  max-height: 100px;
+}
+
+.wt-advice-content p {
+  color: #e9c173;
+  margin: 4px 0;
+}
+
+.wt-container .wt-advice-btn {
+  background: linear-gradient(45deg, #9c27b0, #ba68c8);
+  color: rgb(243, 243, 176);
+  align-self: center;
+}
+
+.wt-container .wt-advice-btn:hover {
+  background: linear-gradient(45deg, #7b1fa2, #ab47bc);
+}
+
+/* Loading animation */
+.wt-container .wt-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.wt-container .wt-loading-spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border-left-color: #ffd54f;
+  animation: wt-spin 1s linear infinite;
+  margin-bottom: 5px;
+}
+
+@keyframes wt-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.wt-container .wt-loading-message {
+  text-align: center;
+  color: #795548;
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* Weight history records */
+.wt-container .wt-weight-records {
+  margin-top: 5px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.wt-container .wt-section-title {
+  font-size: 14px;
+  color: #795548;
+  margin: 5px 0;
+}
+
+.wt-container .wt-records-list {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.wt-container .wt-record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  margin: 3px 0;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.wt-container .wt-record-item:hover {
+  background-color: #fff8e1;
+}
+
+.wt-container .wt-record-date {
+  font-size: 12px;
+  color: #795548;
+}
+
+.wt-container .wt-record-weight {
+  font-weight: bold;
+  color: #5d4037;
+  font-size: 13px;
+}
+
+.wt-container .wt-delete-btn {
+  padding: 2px 4px;
+  font-size: 10px;
+  background: none;
+  color: #e53935;
+  opacity: 0.6;
+}
+
+.wt-container .wt-delete-btn:hover {
+  opacity: 1;
+  background: #ffebee;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Date input styles */
+.wt-container .wt-date-input {
+  max-width: 120px;
+}
+
+/* Responsive layout */
+@media (max-width: 900px) {
+  .wt-container {
+    max-height: none;
+  }
+  
+  .wt-container .wt-content-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .wt-container .wt-stats-compact-row {
+    flex-wrap: wrap;
+  }
+  
+  .wt-container .wt-stat-item {
+    width: 45%;
+    margin-bottom: 8px;
+  }
+  
+  .wt-container .wt-side-panel {
+    max-width: none;
+  }
+  
+  .wt-container .wt-chart-section {
+    height: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .wt-container .wt-stat-item {
+    width: 100%;
+  }
+  
+  .wt-container .wt-form, 
+  .wt-container .wt-food-input, 
+  .wt-container .wt-entry-actions {
+    flex-direction: column;
+  }
+}
+
+/* Mini food display styles */
+.wt-container .wt-mini-tag {
+  font-size: 9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wt-container .wt-mini-nutrition {
+  font-size: 9px;
+  color: #555;
+  display: flex;
+  gap: 2px;
+}
+
+.wt-container .wt-food-card {
+  padding: 5px;
+  height: auto;
+  min-height: 0;
+  max-height: 180px;
+}
+
+.wt-container .wt-card-title {
+  margin: 0 0 4px 0;
+  padding-bottom: 2px;
+  font-size: 14px;
+  border-bottom: 1px solid #ffd54f;
+}
+
+.wt-container .wt-food-list {
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.wt-container .wt-food-btn {
+  padding: 3px;
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.wt-container .wt-total-calories {
+  padding: 1px;
+  margin: 1px 0;
+  font-size: 9px;
+  text-align: right;
+  border: none;
+  background: none;
+}
+
+/* Ultra-minimal food tracking */
+.wt-container .wt-food-card-mini {
+  padding: 4px !important;
+  margin-bottom: 8px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  border: 1px solid #ffe082 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  min-height: 0 !important;
+  max-height: 150px !important;
+  overflow: hidden !important;
+}
+
+.wt-container .wt-card-title-mini {
+  color: #795548 !important;
+  margin: 0 0 2px 0 !important;
+  padding-bottom: 2px !important;
+  font-size: 14px !important;
+  text-align: center !important;
+  border-bottom: 1px solid #ffd54f !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.wt-container .wt-food-list-mini {
+  max-height: 60px !important;
+  overflow-y: auto !important;
+  margin-bottom: 4px !important;
+}
+
+.wt-container .wt-food-item-mini {
+  padding: 2px 4px !important;
+  margin-bottom: 2px !important;
+  border-left: 2px solid #ffd54f !important;
+  background: #f9f9f9 !important;
+  border-radius: 3px !important;
+  font-size: 10px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.wt-container .wt-no-data-mini {
+  text-align: center !important;
+  color: #757575 !important;
+  font-style: italic !important;
+  font-size: 10px !important;
+  margin: 4px 0 !important;
+}
+
+.wt-container .wt-food-btn-mini {
+  padding: 2px 4px !important;
+  font-size: 10px !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+  background: linear-gradient(45deg, #ff9800, #ffb74d) !important;
+  color: white !important;
+}
+
+.wt-container .wt-mini-tag {
+  font-size: 8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-left: 4px;
+}
+
+/* 餐食推荐按钮样式 */
+.wt-container .wt-meal-toggle {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.wt-container .wt-meal-btn {
+  background: linear-gradient(45deg, #66bb6a, #81c784);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 15px;
+  width: auto;
+  min-width: 200px;
+}
+
+.wt-container .wt-meal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(45deg, #43a047, #66bb6a);
+}

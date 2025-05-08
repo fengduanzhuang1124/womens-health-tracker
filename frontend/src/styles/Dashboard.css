@@ -80,6 +80,8 @@
   background-color: #fff9c4;
   /* background-color: #fbc02d; */
 }
+
+
 .nav-bar-theme-profile {
   background-color: #ffe0b2;
 }
@@ -94,4 +96,7 @@
 }
 .nav-bar-theme-profile button {
   background-color: #ffb74d;
+}
+.weight-theme .content {
+  background-color: #eef698; 
 }

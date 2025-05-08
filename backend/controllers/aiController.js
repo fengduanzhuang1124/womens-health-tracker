@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 dotenv.config();
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // 使用 .env 中的密钥
+  apiKey: process.env.OPENAI_API_KEY, 
 });
 
 export const getHealthAdvice = async (req, res) => {
@@ -45,7 +45,7 @@ export const getHealthAdvice = async (req, res) => {
     }
   };
   
-  // 📊 睡眠趋势建议
+
   export const getTrendSleepAdvice = async (req, res) => {
     try {
       const { records } = req.body; // [{ date, duration }]
@@ -64,6 +64,37 @@ export const getHealthAdvice = async (req, res) => {
     } catch (err) {
       console.error("AI Trend Advice Error:", err.message);
       res.status(500).json({ error: "Failed to generate sleep trend advice." });
+    }
+  };
+  export const getMusicKeywords = async (req, res) => {
+    try {
+      const { records, likedTags = [] } = req.body;
+  
+      const summary = records.map(r => `${r.date}: ${r.duration} hrs`).join("; ");
+      const tagString = likedTags.length > 0 ? likedTags.join(", ") : "no specific preference";
+  
+      const prompt = `
+  The user has the following sleep durations: ${summary}.
+  Their preferred music tags are: ${tagString}.
+  Please suggest 3–5 search keywords that match relaxing or sleep-enhancing music.
+  Use short, lowercase keywords suitable for querying a sound API.`;
+  
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+      });
+  
+      const responseText = completion.choices[0].message.content;
+      const keywords = responseText
+        .split(/[,;\n]/)
+        .map(k => k.trim().toLowerCase())
+        .filter(k => k.length > 0);
+  
+      res.status(200).json({ keywords });
+    } catch (err) {
+      console.error("AI Music Keywords Error:", err.message);
+      res.status(500).json({ error: "Failed to generate music keywords" });
     }
   };
   

@@ -160,39 +160,41 @@
     max-height: 220px;
     overflow-y: auto;
     padding: 10px;
+    background-color: #f9a8d4;
   }
   
   .history-item {
     display: flex;
-
   align-items: center; 
   justify-content: space-between; 
   background-color: #f9a8d4;
   padding: 10px 15px;
   margin-bottom: 10px;
   border-radius: 15px;
-  color:white;
+  /* color:white; */
   font-weight: 500;
   box-shadow: 0 2px 5px rgba(0,0,0,0.08);
   transition: transform 0.2s ease;
   }
   .history-item:hover {
     transform: scale(1.01);
+    background-color: #e6b6c7;
   }
   
   .record-info {
     flex: 1;
     margin-left: 10px;
+   
   }
   .history-item:hover {
     transform: scale(1.01);
     
-    background-color: #ffe0eb;
+    
   }
   
   .record-dates {
     font-size: 15px;
-    color: white;
+    color: #ffe0eb;
   }
   
   .moon-icon {

@@ -1,31 +1,47 @@
 import functions from "firebase-functions";
-import OpenAI from "openai";
+
+import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
-const corsHandler = cors({ origin: true });
+//  initialize the Express application
+const app = express();
+app.use(cors({origin: true}));
+app.use(express.json());
 
-const openai = new OpenAI({
-  apiKey: functions.config().openai.key,
-});
-
-export const generateHealthAdvice = functions.https.onRequest((req, res) => {
-  corsHandler(req, res, async () => {
-    try {
-      const { cycle, duration } = req.body;
-
-      const prompt = `The user's menstrual cycle is ${cycle} days and their period lasts ${duration} days. Please provide a friendly and medically-informed suggestion in 2–3 sentences.`;
-
-      const chatCompletion = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-      });
-
-      const advice = chatCompletion.choices[0].message.content;
-      res.status(200).json({ advice });
-    } catch (error) {
-      console.error("OpenAI Error:", error.message);
-      res.status(500).json({ error: "AI generation failed." });
-    }
+// 在请求处理前添加日志
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`, {
+      query: req.query,
+      body: req.body,
+      user: req.user?.uid
+    });
+    next();
   });
-});
+  
+  // 在错误处理中添加日志
+  app.use((error, req, res, next) => {
+    console.error(`[ERROR] ${error.message}`, error);
+    res.status(500).json({ error: error.message });
+  });
+// import the routes
+import menstrualRoutes from "./routes/menstrualRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import sleepRoutes from "./routes/sleepRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
+import weightRoutes from "./routes/weightRoutes.js";
+import mealRoutes from "./routes/mealRoutes.js";
+
+
+
+// set the routes  
+app.use("/api/menstrual", menstrualRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/sleep", sleepRoutes);
+app.use("/api", aiRoutes);
+app.use("/api/weight", weightRoutes);
+app.use("/api/meal", mealRoutes);
+
+//  export the API as a Firebase cloud function
+export const api = functions.https.onRequest(app);

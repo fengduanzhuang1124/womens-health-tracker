@@ -1,19 +1,26 @@
 module.exports = {
+  root: true,
   env: {
     es6: true,
     node: true,
   },
   parserOptions: {
-    "ecmaVersion": 2018,
+    sourceType: "module",
+    ecmaVersion: 2020,
   },
   extends: [
     "eslint:recommended",
     "google",
   ],
   rules: {
-    "no-restricted-globals": ["error", "name", "length"],
-    "prefer-arrow-callback": "error",
-    "quotes": ["error", "double", {"allowTemplateLiterals": true}],
+    "quotes": ["error", "double"],
+    "max-len": 0,
+    "linebreak-style": 0,
+    "import/no-unresolved": 0,
+    "require-jsdoc": 0,
+    "no-multiple-empty-lines": ["error", { "max": 2 }],
+    "new-cap": 0,
+    "no-undef": 0
   },
   overrides: [
     {

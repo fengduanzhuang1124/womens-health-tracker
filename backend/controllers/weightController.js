@@ -155,12 +155,12 @@ export const addFoodEntry = async (req, res) => {
     
     const foodsRef = db.collection("users").doc(uid).collection("foodRecords");
     
-    // 检查是否已有当天记录
+    //  check if there is already a record for today
     const today = date || new Date().toISOString().split("T")[0];
     const existingQuery = await foodsRef.where("date", "==", today).get();
     
     if (!existingQuery.empty) {
-      //update existing record
+        //update existing record
       const docId = existingQuery.docs[0].id;
       await foodsRef.doc(docId).update({
         foods: foods,
@@ -196,15 +196,15 @@ export const getAIAdvice = async (req, res) => {
     try {
       const uid = req.user.uid;
       
-      // 获取近期体重记录
+      // get recent weight records
       const weightsRef = db.collection("users").doc(uid).collection("weightRecords");
       const recentWeights = await weightsRef.orderBy("date", "desc").limit(10).get();
       
-      // 获取近期食物记录
+      // get recent food records
       const foodsRef = db.collection("users").doc(uid).collection("foodRecords");
       const recentFoods = await foodsRef.orderBy("date", "desc").limit(7).get();
       
-      // 格式化数据
+      // format data
       const weightData = [];
       recentWeights.forEach(doc => {
         const data = doc.data();
@@ -214,11 +214,11 @@ export const getAIAdvice = async (req, res) => {
         });
       });
       
-      // 增强的食物数据，包含详细营养信息
+      // enhanced food data, including detailed nutrition information
       const foodData = [];
       recentFoods.forEach(doc => {
         const data = doc.data();
-        // 确保包含每种食物的详细营养信息
+        // ensure including detailed nutrition information for each food
         foodData.push({
           date: data.date,
           foods: data.foods.map(food => ({
@@ -233,7 +233,7 @@ export const getAIAdvice = async (req, res) => {
         });
       });
       
-      // 计算每日总热量和营养素分布
+      // calculate total calories and nutrition distribution per day
       const dailyNutrition = foodData.map(day => {
         const totalCals = day.foods.reduce((sum, food) => sum + (food.calories || 0), 0);
         const totalProtein = day.foods.reduce((sum, food) => sum + (food.protein || 0), 0);
@@ -252,7 +252,7 @@ export const getAIAdvice = async (req, res) => {
         };
       });
       
-      // 给 OpenAI 提供更结构化的数据
+      // provide more structured data to OpenAI
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
@@ -294,7 +294,7 @@ export const getFoodNutrition = async (req, res) => {
     
     console.log(`Searching nutrition for: "${foodName}"`);
     
-    // 调用 API Ninjas Nutrition API
+    // call API Ninjas Nutrition API
     const response = await fetch(`https://api.api-ninjas.com/v1/nutrition?query=${encodeURIComponent(foodName)}`, {
       headers: {
         'X-Api-Key': apiKey
@@ -302,10 +302,10 @@ export const getFoodNutrition = async (req, res) => {
     });
     
     if (!response.ok) {
-      // API 错误，返回模拟数据而不抛出错误
+      // API error, return mock data without throwing an error
       console.error(`API responded with status: ${response.status}`);
       
-      // 创建模拟数据
+      // create mock data
       const mockNutritionInfo = {
         name: foodName,
         calories: Math.floor(Math.random() * 300) + 50,
@@ -330,14 +330,14 @@ export const getFoodNutrition = async (req, res) => {
       return res.status(404).json({ error: "No nutrition data found for this food" });
     }
     
-    // 提取第一个食物项
+    // extract the first food item
     const foodData = data[0];
     
-    // 处理 Premium 功能限制
-    // 如果 calories 是字符串（"Only available for premium subscribers"），则通过其他可用数据估算
+    // handle Premium feature limit
+    // if calories is a string ("Only available for premium subscribers"), estimate it using other available data
     let calories = foodData.calories;
     if (typeof calories === 'string' || calories === undefined) {
-      // 估算热量: 脂肪 × 9 + 碳水 × 4 + 蛋白质 × 4
+      // estimate calories: fat × 9 + carbs × 4 + protein × 4
       const fat = Number(foodData.fat_total_g) || 0;
       const carbs = Number(foodData.carbohydrates_total_g) || 0;
       const protein = typeof foodData.protein_g === 'string' ? 0 : Number(foodData.protein_g) || 0;
@@ -345,24 +345,24 @@ export const getFoodNutrition = async (req, res) => {
       calories = (fat * 9) + (carbs * 4) + (protein * 4);
     }
     
-    // 同样处理蛋白质
+    // handle protein
     let protein = foodData.protein_g;
     if (typeof protein === 'string' || protein === undefined) {
-      // 估算蛋白质：如果无法获取，可以基于食物类型提供默认估计
-      // 这只是一个简单估计
+      // estimate protein: if cannot get, provide default estimate based on food type
+      // this is just a simple estimate
       if (foodData.fat_total_g > 10) {
-        // 高脂肪食物通常有适量蛋白质
+        // high fat food usually has moderate protein
         protein = 5;
       } else if (foodData.carbohydrates_total_g > 20) {
-        // 高碳水食物可能有少量蛋白质
+        // high carb food usually has moderate protein
         protein = 2;
       } else {
-        // 默认值
+        // default value
         protein = 3;
       }
     }
     
-    // 创建营养信息对象
+    // create nutrition info object
     const nutritionInfo = {
       name: foodData.name || foodName,
       calories: Math.round(calories),
@@ -374,7 +374,7 @@ export const getFoodNutrition = async (req, res) => {
       cholesterol: Math.round(foodData.cholesterol_mg || 0),
       sodium: Math.round(foodData.sodium_mg || 0),
       potassium: Math.round(foodData.potassium_mg || 0),
-      // 基于多个因素判断食物健康度
+      // based on multiple factors to judge food health
       isHealthy: (
         (foodData.cholesterol_mg < 100) && 
         (foodData.sugar_g < 10) && 
@@ -388,7 +388,7 @@ export const getFoodNutrition = async (req, res) => {
   } catch (error) {
     console.error("Error getting food nutrition:", error);
     
-    // 如果出现错误，返回模拟数据
+    // if error, return mock data
     const mockNutritionInfo = {
       name: foodName,
       calories: Math.floor(Math.random() * 300) + 50,
@@ -460,5 +460,31 @@ export const deleteWeight = async (req, res) => {
   } catch (error) {
     console.error("Error deleting weight record:", error);
     res.status(500).json({ error: "Failed to delete weight record" });
+  }
+};
+
+export const getGoalWeight = async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    
+    // 获取用户文档以查找目标体重
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+    
+    if (!userDoc.exists) {
+      return res.status(200).json({ goalWeight: null });
+    }
+    
+    const userData = userDoc.data();
+    
+    // 如果用户文档中有目标体重，则返回 
+    if (userData.goalWeight) {
+      return res.status(200).json({ goalWeight: userData.goalWeight });
+    } else {
+      return res.status(200).json({ goalWeight: null });
+    }
+  } catch (error) {
+    console.error("Error fetching goal weight:", error);
+    res.status(500).json({ error: "Failed to fetch goal weight" });
   }
 };

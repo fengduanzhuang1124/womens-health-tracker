@@ -2,11 +2,10 @@ import axios from "axios";
 import { getAuth } from "firebase/auth";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: "https://us-central1-womens-health-tracker.cloudfunctions.net/api",
   headers: {
     "Content-Type": "application/json",
 },
-
 });
 API.interceptors.request.use(async (config) => {
   const auth = getAuth();

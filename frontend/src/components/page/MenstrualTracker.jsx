@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 // import axios from "axios";
 import API from "../../api";
 //import { db } from "../../firebase";
@@ -7,58 +7,49 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../../styles/MenstrualTracker.css";
 import moment from "moment";
+import useDataCache from "../../hooks/useDataCache";
 import cute from "../../assets/cute.png";
 import moon from "../../assets/moon.png";
 import catsmeil from "../../assets/catsmeil.png";
-
+import "../../styles/common.css";
 moment.locale("en-gb");
 
-const MenstrualTracker = ({}) => {
-  const [nextPeriodDays, setNextPeriodDays] = useState(null);
-  const [cycleLength, setCycleLength] = useState(28);
-  const [calendarData, setCalendarData] = useState([]);
+const MenstrualTracker = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [periodHistory, setPeriodHistory] = useState([]);
-
-  //Used to temporarily store the user's "start of period" date
   const [tempStartDate, setTempStartDate] = useState(null);
-  const [chartData, setChartData] = useState([]);
 
-  // Get data when the component loads
-  useEffect(() => {
-    fetchMenstrualData();
-  }, []);
-
-  // get data from Firestore
-  const fetchMenstrualData = async () => {
-    try {
-      // const res = await API.get(`/api/menstrual/${userId}`);
-      // console.log("Fetched data:", res.data);
-      // const { data, calendarData, nextPeriodDays, cycleLength } = res.data;
-      // console.log("Fetched data:", res.data);
+  const { 
+    data: menstrualData, 
+    loading, 
+    error, 
+    refresh 
+  } = useDataCache(
+    'menstrual-data',
+    async () => {
       const res = await API.get("/api/menstrual/me");
-      const { data, calendarData, nextPeriodDays, cycleLength } = res.data;
-
-      setPeriodHistory(data);
-      setCalendarData(calendarData);
-      setNextPeriodDays(nextPeriodDays);
-      setCycleLength(cycleLength);
-
-      // Chart transform data
-      const chartPoints = data.map((period) => ({
-        month: new Date(period.startDate).toLocaleDateString("en-GB", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
-        duration: period.duration || 0,
-        cycleLength: period.cycleLength || cycleLength,
-      }));
-      setChartData(chartPoints);
-    } catch (error) {
-      console.error("Failed to fetch menstrual data:", error);
+      return res.data;
     }
-  };
+  );
+
+  if (loading) {
+    return <div className="loading">Loading menstrual data...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error">
+        Error loading data: {error}
+        <button onClick={refresh}>Retry</button>
+      </div>
+    );
+  }
+
+  const {
+    data = [],
+    calendarData = [],
+    nextPeriodDays,
+    cycleLength = 28
+  } = menstrualData || {};
 
   // Handling Calendar Clicks
   const handleCalendarClick = (date) => {
@@ -94,7 +85,7 @@ const MenstrualTracker = ({}) => {
       alert("Period data saved!");
       setTempStartDate(null);
       // Retrieve data
-      fetchMenstrualData();
+      refresh();
     } catch (error) {
       console.error("Error saving period data:", error);
       alert(
@@ -116,13 +107,13 @@ const MenstrualTracker = ({}) => {
 
       await API.delete(`/api/menstrual/${recordId}`);
       alert("Menstrual record deleted!");
-      fetchMenstrualData(); // Refresh UI
+      refresh(); // Refresh UI
     } catch (error) {
       console.error("Deletion failed:", error);
       alert("Deletion failed, please check the network or backend service");
     }
   };
-  console.log("📊 chartData:", chartData);
+  console.log("📊 chartData:", data);
 
   return (
     <div className="menstrual-tracker">
@@ -184,8 +175,8 @@ const MenstrualTracker = ({}) => {
           <h4>Average Cycle: {cycleLength} days</h4>
 
           <div className="history-list">
-            {periodHistory.length > 0 ? (
-              periodHistory.map((period, index) => (
+            {data.length > 0 ? (
+              data.map((period, index) => (
                 <div key={index} className="history-item">
                   <img src={moon} alt="moon" className="moon-icon" />
                   <div className="record-info">

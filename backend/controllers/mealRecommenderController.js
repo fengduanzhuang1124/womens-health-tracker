@@ -9,7 +9,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// 食物类型和emoji图标映射
+//  food type and emoji icon mapping
 const FOOD_ICONS = {
   fruit: "🍎",
   vegetable: "🥦",
@@ -25,14 +25,14 @@ const FOOD_ICONS = {
 };
 
 /**
- * 获取用户的餐食推荐
- * 基于用户的体重、目标体重和其他健康数据生成个性化餐食计划
+ *  get user's meal recommendations
+ *  based on user's weight, goal weight and other health data to generate personalized meal plan
  */
 export const getMealRecommendations = async (req, res) => {
   try {
     const uid = req.user.uid;
     
-    // 获取请求中的参数或从用户资料中获取
+    // get parameters from request or from user profile
     let { 
       currentWeight, 
       goalWeight, 
@@ -43,9 +43,9 @@ export const getMealRecommendations = async (req, res) => {
       dietPreference 
     } = req.query;
     
-    // 如果请求中没有参数，从用户资料中获取
+    // if there is no parameters in request, get from user profile
     if (!currentWeight || !goalWeight) {
-      // 获取用户最新体重记录
+      // get user's latest weight record
       const weightsRef = db.collection("users").doc(uid).collection("weightRecords");
       const weightSnapshot = await weightsRef.orderBy("date", "desc").limit(1).get();
       
@@ -53,7 +53,7 @@ export const getMealRecommendations = async (req, res) => {
         currentWeight = weightSnapshot.docs[0].data().weight;
       }
       
-      // 获取用户资料信息
+      // get user's profile information
       const userRef = db.collection("users").doc(uid);
       const userDoc = await userRef.get();
       
@@ -68,20 +68,20 @@ export const getMealRecommendations = async (req, res) => {
       }
     }
     
-    // 如果仍然缺少必要数据，返回错误
+    // if still missing required data, return error
     if (!currentWeight || !goalWeight) {
       return res.status(400).json({ 
         error: "Missing required parameters. Please provide weight data or update your profile." 
       });
     }
     
-    // 将参数转换为正确的类型
+    // convert parameters to correct types
     currentWeight = Number(currentWeight);
     goalWeight = Number(goalWeight);
     height = Number(height || 165);
     age = Number(age || 30);
     
-    // 计算每日所需卡路里
+    // calculate daily calorie needs
     const calorieNeeds = calculateCalorieNeeds(
       currentWeight, 
       goalWeight, 
@@ -91,10 +91,10 @@ export const getMealRecommendations = async (req, res) => {
       activityLevel
     );
     
-    // 计算宏量营养素分配
+    // calculate macros distribution
     const macros = calculateMacros(calorieNeeds, dietPreference);
     
-    // 获取AI生成的餐食计划
+    // get AI generated meal plan
     const mealPlan = await generateAIMealPlan(
       currentWeight, 
       goalWeight, 
@@ -103,7 +103,7 @@ export const getMealRecommendations = async (req, res) => {
       dietPreference
     );
     
-    // 保存用户的餐食计划到数据库
+    // save user's meal plan to database
     await saveMealPlan(uid, mealPlan);
     
     res.status(200).json(mealPlan);
@@ -114,14 +114,14 @@ export const getMealRecommendations = async (req, res) => {
 };
 
 /**
- * 更新用户的饮食偏好
+ *  update user's diet preferences
  */
 export const updateDietPreferences = async (req, res) => {
   try {
     const uid = req.user.uid;
     const { dietPreference } = req.body;
     
-    // 验证饮食偏好是否有效
+    // validate if the diet preference is valid
     const validPreferences = ['balanced', 'lowCarb', 'highProtein', 'vegetarian', 'vegan'];
     if (!dietPreference || !validPreferences.includes(dietPreference)) {
       return res.status(400).json({ 
@@ -129,7 +129,7 @@ export const updateDietPreferences = async (req, res) => {
       });
     }
     
-    // 更新用户资料
+    // update user's profile
     const userRef = db.collection("users").doc(uid);
     await userRef.update({
       dietPreference: dietPreference,
@@ -147,7 +147,7 @@ export const updateDietPreferences = async (req, res) => {
 };
 
 /**
- * 获取用户保存的餐食计划历史
+ *  get user's saved meal plan history
  */
 export const getMealPlanHistory = async (req, res) => {
   try {
@@ -173,10 +173,10 @@ export const getMealPlanHistory = async (req, res) => {
 };
 
 /**
- * 根据体重目标和身体数据计算每日所需卡路里
+* based on weight goal and body data to calculate daily calorie needs
  */
 function calculateCalorieNeeds(currentWeight, goalWeight, height, age, gender, activityLevel) {
-  // 基础代谢率 (BMR)
+  // (BMR) the basal metabolic rate
   let bmr;
   if (gender === 'female') {
     bmr = 655 + (9.6 * currentWeight) + (1.8 * height) - (4.7 * age);
@@ -184,7 +184,7 @@ function calculateCalorieNeeds(currentWeight, goalWeight, height, age, gender, a
     bmr = 66 + (13.7 * currentWeight) + (5 * height) - (6.8 * age);
   }
   
-  // 根据活动水平调整
+  // adjust based on activity level
   const activityMultipliers = {
     sedentary: 1.2,
     light: 1.375,
@@ -195,16 +195,16 @@ function calculateCalorieNeeds(currentWeight, goalWeight, height, age, gender, a
   
   const tdee = bmr * (activityMultipliers[activityLevel] || 1.2);
   
-  // 根据目标调整卡路里
+  // adjust based on weight goal
   const weightDifference = goalWeight - currentWeight;
-  // 如果目标是减重，每天减少500卡路里；如果是增重，每天增加500卡路里
+  // if the goal is to lose weight, reduce 500 calories per day; if the goal is to gain weight, increase 500 calories per day
   const calorieAdjustment = weightDifference < 0 ? -500 : (weightDifference > 0 ? 500 : 0);
   
   return Math.round(tdee + calorieAdjustment);
 }
 
 /**
- * 计算宏量营养素分配
+ *  calculate macros distribution
  */
 function calculateMacros(totalCalories, dietType = 'balanced') {
   let proteinPercentage, carbPercentage, fatPercentage;
@@ -235,24 +235,24 @@ function calculateMacros(totalCalories, dietType = 'balanced') {
   }
   
   return {
-    protein: Math.round((totalCalories * proteinPercentage) / 4), // 4卡路里每克蛋白质
-    carbs: Math.round((totalCalories * carbPercentage) / 4),      // 4卡路里每克碳水
-    fat: Math.round((totalCalories * fatPercentage) / 9)          // 9卡路里每克脂肪
+    protein: Math.round((totalCalories * proteinPercentage) / 4), // 4 calories per gram of protein
+    carbs: Math.round((totalCalories * carbPercentage) / 4),      // 4 calories per gram of carbs
+    fat: Math.round((totalCalories * fatPercentage) / 9)          // 9 calories per gram of fat
   };
 }
 
 /**
- * 使用OpenAI生成餐食计划
+*  based on user's weight, goal weight, calorie needs and diet preference to generate meal plan
  */
 async function generateAIMealPlan(currentWeight, goalWeight, calorieNeeds, macros, dietPreference) {
   try {
-    // 分配卡路里到各餐
-    const breakfastCal = Math.round(calorieNeeds * 0.25); // 25% 早餐
-    const lunchCal = Math.round(calorieNeeds * 0.35);     // 35% 午餐
-    const dinnerCal = Math.round(calorieNeeds * 0.30);    // 30% 晚餐
-    const snackCal = Math.round(calorieNeeds * 0.10);     // 10% 零食
+    // distribute calories to each meal
+    const breakfastCal = Math.round(calorieNeeds * 0.25); // 25% breakfast
+    const lunchCal = Math.round(calorieNeeds * 0.35);     // 35% lunch
+    const dinnerCal = Math.round(calorieNeeds * 0.30);    // 30% dinner
+    const snackCal = Math.round(calorieNeeds * 0.10);     // 10% snack
     
-    // 构建提示
+    // build prompt
     const prompt = `
 Generate a healthy meal plan for a person with the following characteristics:
 - Current weight: ${currentWeight} kg
@@ -284,7 +284,7 @@ Format as JSON with no additional text.
       response_format: { type: "json_object" }
     });
 
-    // 解析生成的JSON响应
+    // parse the generated JSON response
     const responseContent = completion.choices[0].message.content;
     let mealPlanData;
     
@@ -292,11 +292,11 @@ Format as JSON with no additional text.
       mealPlanData = JSON.parse(responseContent);
     } catch (err) {
       console.error("Error parsing OpenAI response:", err);
-      // 如果解析失败，返回备用餐食计划
+      // if parsing fails, return fallback meal plan
       return getFallbackMealPlan(calorieNeeds, macros, dietPreference);
     }
     
-    // 处理并格式化生成的餐食计划
+    // process and format the generated meal plan
     return formatMealPlan(mealPlanData, calorieNeeds, macros);
   } catch (error) {
     console.error("Error generating AI meal plan:", error);
@@ -305,10 +305,10 @@ Format as JSON with no additional text.
 }
 
 /**
- * 格式化餐食计划，添加图标和其他必要信息
+ *  format meal plan, add icon and other necessary information
  */
 function formatMealPlan(rawMealPlan, calorieNeeds, macros) {
-  // 这个函数处理从OpenAI返回的原始数据，确保格式一致
+  // this function processes the original data returned from OpenAI, ensuring consistency
   const formattedPlan = {
     date: new Date().toISOString().split('T')[0],
     calorieNeeds: calorieNeeds,
@@ -319,7 +319,7 @@ function formatMealPlan(rawMealPlan, calorieNeeds, macros) {
     snack: processMeal(rawMealPlan.snack || {}, 'snack')
   };
   
-  // 计算总摄入量
+  // calculate total calories
   formattedPlan.totalCalories = 
     formattedPlan.breakfast.calories + 
     formattedPlan.lunch.calories + 
@@ -344,14 +344,90 @@ function formatMealPlan(rawMealPlan, calorieNeeds, macros) {
     formattedPlan.dinner.fat + 
     formattedPlan.snack.fat;
   
+  // Log the formatted plan to check values
+  console.log("Formatted meal plan (macros check):");
+  console.log(`Breakfast - Protein: ${formattedPlan.breakfast.protein}g, Carbs: ${formattedPlan.breakfast.carbs}g, Fat: ${formattedPlan.breakfast.fat}g`);
+  console.log(`Lunch - Protein: ${formattedPlan.lunch.protein}g, Carbs: ${formattedPlan.lunch.carbs}g, Fat: ${formattedPlan.lunch.fat}g`);
+  console.log(`Dinner - Protein: ${formattedPlan.dinner.protein}g, Carbs: ${formattedPlan.dinner.carbs}g, Fat: ${formattedPlan.dinner.fat}g`);
+  console.log(`Snack - Protein: ${formattedPlan.snack.protein}g, Carbs: ${formattedPlan.snack.carbs}g, Fat: ${formattedPlan.snack.fat}g`);
+  console.log(`Totals - Protein: ${formattedPlan.totalProtein}g, Carbs: ${formattedPlan.totalCarbs}g, Fat: ${formattedPlan.totalFat}g`);
+  
+  // Make sure values are numbers, not strings
+  formattedPlan.breakfast.protein = Number(formattedPlan.breakfast.protein || 0);
+  formattedPlan.breakfast.carbs = Number(formattedPlan.breakfast.carbs || 0);
+  formattedPlan.breakfast.fat = Number(formattedPlan.breakfast.fat || 0);
+  
+  formattedPlan.lunch.protein = Number(formattedPlan.lunch.protein || 0);
+  formattedPlan.lunch.carbs = Number(formattedPlan.lunch.carbs || 0);
+  formattedPlan.lunch.fat = Number(formattedPlan.lunch.fat || 0);
+  
+  formattedPlan.dinner.protein = Number(formattedPlan.dinner.protein || 0);
+  formattedPlan.dinner.carbs = Number(formattedPlan.dinner.carbs || 0);
+  formattedPlan.dinner.fat = Number(formattedPlan.dinner.fat || 0);
+  
+  formattedPlan.snack.protein = Number(formattedPlan.snack.protein || 0);
+  formattedPlan.snack.carbs = Number(formattedPlan.snack.carbs || 0);
+  formattedPlan.snack.fat = Number(formattedPlan.snack.fat || 0);
+  
+  // Set fallback values if nutritional data is missing or zero
+  if (!formattedPlan.breakfast.protein && !formattedPlan.breakfast.carbs && !formattedPlan.breakfast.fat) {
+    formattedPlan.breakfast.protein = Math.round(macros.protein * 0.25);
+    formattedPlan.breakfast.carbs = Math.round(macros.carbs * 0.30);
+    formattedPlan.breakfast.fat = Math.round(macros.fat * 0.15);
+  }
+  
+  if (!formattedPlan.lunch.protein && !formattedPlan.lunch.carbs && !formattedPlan.lunch.fat) {
+    formattedPlan.lunch.protein = Math.round(macros.protein * 0.35);
+    formattedPlan.lunch.carbs = Math.round(macros.carbs * 0.35);
+    formattedPlan.lunch.fat = Math.round(macros.fat * 0.30);
+  }
+  
+  if (!formattedPlan.dinner.protein && !formattedPlan.dinner.carbs && !formattedPlan.dinner.fat) {
+    formattedPlan.dinner.protein = Math.round(macros.protein * 0.30);
+    formattedPlan.dinner.carbs = Math.round(macros.carbs * 0.25);
+    formattedPlan.dinner.fat = Math.round(macros.fat * 0.40);
+  }
+  
+  if (!formattedPlan.snack.protein && !formattedPlan.snack.carbs && !formattedPlan.snack.fat) {
+    formattedPlan.snack.protein = Math.round(macros.protein * 0.10);
+    formattedPlan.snack.carbs = Math.round(macros.carbs * 0.10);
+    formattedPlan.snack.fat = Math.round(macros.fat * 0.15);
+  }
+  
+  // Recalculate totals after fixes
+  formattedPlan.totalProtein = 
+    formattedPlan.breakfast.protein + 
+    formattedPlan.lunch.protein + 
+    formattedPlan.dinner.protein + 
+    formattedPlan.snack.protein;
+    
+  formattedPlan.totalCarbs = 
+    formattedPlan.breakfast.carbs + 
+    formattedPlan.lunch.carbs + 
+    formattedPlan.dinner.carbs + 
+    formattedPlan.snack.carbs;
+    
+  formattedPlan.totalFat = 
+    formattedPlan.breakfast.fat + 
+    formattedPlan.lunch.fat + 
+    formattedPlan.dinner.fat + 
+    formattedPlan.snack.fat;
+  
+  console.log("After fix - Meal plan (macros check):");
+  console.log(`Breakfast - Protein: ${formattedPlan.breakfast.protein}g, Carbs: ${formattedPlan.breakfast.carbs}g, Fat: ${formattedPlan.breakfast.fat}g`);
+  console.log(`Lunch - Protein: ${formattedPlan.lunch.protein}g, Carbs: ${formattedPlan.lunch.carbs}g, Fat: ${formattedPlan.lunch.fat}g`);
+  console.log(`Dinner - Protein: ${formattedPlan.dinner.protein}g, Carbs: ${formattedPlan.dinner.carbs}g, Fat: ${formattedPlan.dinner.fat}g`);
+  console.log(`Snack - Protein: ${formattedPlan.snack.protein}g, Carbs: ${formattedPlan.snack.carbs}g, Fat: ${formattedPlan.snack.fat}g`);
+  console.log(`Totals - Protein: ${formattedPlan.totalProtein}g, Carbs: ${formattedPlan.totalCarbs}g, Fat: ${formattedPlan.totalFat}g`);
+  
   return formattedPlan;
 }
 
 /**
- * 处理单个餐食数据，添加图标和其他信息
+ * deal with single meal data, add icon and other information
  */
 function processMeal(meal, mealType) {
-  // 确保有默认值
+  // ensure default values
   const processedMeal = {
     name: meal.name || getDefaultMealName(mealType),
     ingredients: Array.isArray(meal.ingredients) ? meal.ingredients : getDefaultIngredients(mealType),
@@ -363,10 +439,10 @@ function processMeal(meal, mealType) {
     icon: FOOD_ICONS[mealType] || FOOD_ICONS.default
   };
   
-  // 为每个原料添加图标
+  // add icon to each ingredient
   if (Array.isArray(processedMeal.ingredients)) {
     processedMeal.ingredients = processedMeal.ingredients.map(ingredient => {
-      // 尝试为每个原料分配适当的图标
+      // try to assign appropriate icon to each ingredient
       const foodType = getFoodTypeFromIngredient(ingredient);
       return {
         name: ingredient,
@@ -379,12 +455,12 @@ function processMeal(meal, mealType) {
 }
 
 /**
- * 根据原料名称推断食物类型
+ *  based on ingredient name to infer food type
  */
 function getFoodTypeFromIngredient(ingredient) {
   const lowerIngredient = ingredient.toLowerCase();
   
-  // 一些简单的判断逻辑
+  // some simple judgment logic
   if (/apple|orange|banana|berry|fruit/i.test(lowerIngredient)) return 'fruit';
   if (/broccoli|spinach|carrot|lettuce|vegetable/i.test(lowerIngredient)) return 'vegetable';
   if (/rice|oat|bread|wheat|grain|pasta/i.test(lowerIngredient)) return 'grain';
@@ -395,7 +471,7 @@ function getFoodTypeFromIngredient(ingredient) {
 }
 
 /**
- * 获取默认餐食名称
+ *  get default meal name
  */
 function getDefaultMealName(mealType) {
   switch (mealType) {
@@ -408,7 +484,7 @@ function getDefaultMealName(mealType) {
 }
 
 /**
- * 获取默认原料
+ *  get default ingredients
  */
 function getDefaultIngredients(mealType) {
   switch (mealType) {
@@ -421,7 +497,7 @@ function getDefaultIngredients(mealType) {
 }
 
 /**
- * 获取默认卡路里
+ *  get default calories
  */
 function getDefaultCalories(mealType) {
   switch (mealType) {
@@ -434,7 +510,7 @@ function getDefaultCalories(mealType) {
 }
 
 /**
- * 获取备用餐食计划
+ *  get fallback meal plan
  */
 function getFallbackMealPlan(calorieNeeds, macros, dietPreference) {
   const breakfastCal = Math.round(calorieNeeds * 0.25);
@@ -444,7 +520,7 @@ function getFallbackMealPlan(calorieNeeds, macros, dietPreference) {
   
   let breakfast, lunch, dinner, snack;
   
-  // 根据饮食偏好选择不同的默认餐食
+  // based on diet preference to choose different default meal
   if (dietPreference === 'vegan' || dietPreference === 'vegetarian') {
     breakfast = {
       name: 'Plant-based Yogurt with Berries and Granola',
@@ -580,7 +656,7 @@ function getFallbackMealPlan(calorieNeeds, macros, dietPreference) {
     };
   }
   
-  // 处理原料，添加图标
+  // process ingredients, add icon
   const processIngredients = (ingredients) => {
     return ingredients.map(ingredient => {
       const foodType = getFoodTypeFromIngredient(ingredient);
@@ -614,18 +690,18 @@ function getFallbackMealPlan(calorieNeeds, macros, dietPreference) {
 }
 
 /**
- * 保存餐食计划到数据库
+ *  save meal plan to database
  */
 async function saveMealPlan(uid, mealPlan) {
   try {
     const mealPlansRef = db.collection("users").doc(uid).collection("mealPlans");
     
-    // 检查是否已有当天的计划
+    // check if there is already a plan for today
     const today = new Date().toISOString().split('T')[0];
     const existingQuery = await mealPlansRef.where("date", "==", today).get();
     
     if (!existingQuery.empty) {
-      // 更新现有记录
+      // update existing record
       const docId = existingQuery.docs[0].id;
       await mealPlansRef.doc(docId).update({
         ...mealPlan,
@@ -634,7 +710,7 @@ async function saveMealPlan(uid, mealPlan) {
       
       return docId;
     } else {
-      // 创建新记录
+      // create new record
       const result = await mealPlansRef.add({
         ...mealPlan,
         createdAt: Timestamp.now()

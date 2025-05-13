@@ -84,3 +84,29 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const uid = req.user?.uid;
+    if (!uid) return res.status(401).json({ error: "No user ID found in token." });
+
+    const { height, age, gender, activityLevel } = req.body;
+    
+    // Define the fields to update
+    const updateData = {};
+    
+    // Only include fields that are provided in the request
+    if (height !== undefined) updateData.height = Number(height);
+    if (age !== undefined) updateData.age = Number(age);
+    if (gender) updateData.gender = gender;
+    if (activityLevel) updateData.activityLevel = activityLevel;
+    
+    // Update user document
+    await db.collection("users").doc(uid).update(updateData);
+    
+    res.status(200).json({ message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ error: error.message });
+  }
+};

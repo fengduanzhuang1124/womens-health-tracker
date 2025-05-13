@@ -7,20 +7,49 @@ import { db, auth } from "../../firebase";
 import API from "../../api";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import avatarGirl from "../../assets/avatar-girl.png";
+import useDataCache from "../../hooks/useDataCache";
 
 const Profile = ({ setProfileTab }) => {
-  const [activeTab, setActiveTab] = useState("menstrual");
-  const [menstrualData, setMenstrualData] = useState([]);
-  const [avgCycleLength, setAvgCycleLength] = useState(28);
-  const [sleepData, setSleepData] = useState([]);
-  const [weightData, setWeightData] = useState([]);
-  const [isProfileVisible, setIsProfileVisible] = useState(true);
+  const [activeTab, setActiveTab] = useState("period");
+  const [isProfileVisible, setIsProfileVisible] = useState(false);
+  const [weights, setWeights] = useState([]);
+  const [sleep, setSleep] = useState([]);
   const [currentWeight, setCurrentWeight] = useState(null);
+  const [initialWeight, setInitialWeight] = useState(null);
   const [goalWeight, setGoalWeight] = useState(null);
+  const [periods, setPeriods] = useState([]);
+  const [profileData, setProfileData] = useState(null);
+  const [avgCycleLength, setAvgCycleLength] = useState(28);
   const [height, setHeight] = useState(165); // height in cm
   const [age, setAge] = useState(30); // default age
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    age: "",
+    height: "",
+    weight: "",
+    goalWeight: "",
+    activityLevel: "moderate",
+    gender: "female"
+  });
 
   const user = auth.currentUser;
+
+  const { data: menstrualData, loading: loadingMenstrual, error: errorMenstrual, refresh: refreshMenstrual } = useDataCache(
+    `menstrual-data-${user?.uid}`,
+    async () => {
+      const res = await API.get("/api/menstrual/me");
+      return res.data;
+    }
+  );
+
+  const { data: userData, loading: loadingUser } = useDataCache(
+    `user-profile-${user?.uid}`,
+    async () => {
+      const res = await API.get("/api/users/me/profile");
+      return res.data;
+    }
+  );
 
   // Load visibility preference from localStorage on mount
   useEffect(() => {
@@ -38,33 +67,12 @@ const Profile = ({ setProfileTab }) => {
   useEffect(() => {
     if (!user?.uid) return;
 
-    const fetchMenstrual = async () => {
-      try {
-        const res = await API.get("/api/menstrual/me");
-        const { data, cycleLength } = res.data;
-
-        const chartPoints = data.map((period) => ({
-          month: new Date(period.startDate).toLocaleDateString("en-GB", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          }),
-          duration: period.duration || 0,
-        }));
-
-        setMenstrualData(chartPoints);
-        setAvgCycleLength(cycleLength);
-      } catch (error) {
-        console.error("Error fetching menstrual data in profile:", error);
-      }
-    };
-
     const fetchUserData = async () => {
       try {
         // Fetch weight data
-        const weightResponse = await API.get("/api/weight/me");
-        if (weightResponse.data.weights && weightResponse.data.weights.length > 0) {
-          const sortedWeights = [...weightResponse.data.weights].sort((a, b) => 
+        const weightResponse = await API.get("/api/weight");
+        if (weightResponse.data && weightResponse.data.length > 0) {
+          const sortedWeights = [...weightResponse.data].sort((a, b) => 
             new Date(b.date) - new Date(a.date)
           );
           setCurrentWeight(sortedWeights[0].weight);
@@ -77,10 +85,11 @@ const Profile = ({ setProfileTab }) => {
         }
         
         // Fetch user profile for height and age if available
-        const profileResponse = await API.get("/api/users/profile");
+        const profileResponse = await API.get("/api/users/me/profile");
         if (profileResponse.data) {
           if (profileResponse.data.height) setHeight(profileResponse.data.height);
           if (profileResponse.data.age) setAge(profileResponse.data.age);
+          setProfileData(profileResponse.data);
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -88,14 +97,13 @@ const Profile = ({ setProfileTab }) => {
     };
 
     fetchUserData();
-    fetchMenstrual();
     fetchSleepData();
   }, [user?.uid]);
 
   const fetchSleepData = async () => {
     try {
       const res = await API.get(`/api/sleep/me`);
-      setSleepData(res.data);
+      setSleep(res.data);
     } catch (err) {
       console.error("Error fetching sleep data:", err);
     }
@@ -109,6 +117,100 @@ const Profile = ({ setProfileTab }) => {
   const toggleProfileVisibility = () => {
     setIsProfileVisible(!isProfileVisible);
   };
+
+  // Fetch user profile data
+  const fetchProfileData = async () => {
+    try {
+      const response = await API.get("/api/users/me/profile");
+      if (response.data) {
+        setProfileData(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+    }
+  };
+
+  const fetchWeights = async () => {
+    try {
+      const response = await API.get("/api/weight");
+      setWeights(response.data);
+    } catch (error) {
+      console.error("Error fetching weights:", error);
+    }
+  };
+
+  // 添加获取目标体重的方法
+  const fetchGoalWeight = async () => {
+    try {
+      const response = await API.get("/api/weight/goal");
+      if (response.data && response.data.goalWeight) {
+        setGoalWeight(response.data.goalWeight);
+      }
+    } catch (error) {
+      console.error("Error fetching goal weight:", error);
+    }
+  };
+
+  // 添加获取经期数据的方法
+  const fetchUserPeriods = async () => {
+    try {
+      if (!user?.uid) return;
+      
+      const res = await API.get("/api/menstrual/me");
+      if (res.data && res.data.data) {
+        setPeriods(res.data.data);
+        
+        if (res.data.cycleLength) {
+          setAvgCycleLength(res.data.cycleLength);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching menstrual data:", error);
+    }
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    if (user) {
+      fetchWeights();
+      fetchGoalWeight();
+      fetchSleepData();
+      fetchUserPeriods();
+      fetchProfileData();
+    }
+  }, [user]);
+
+  // 当用户数据加载完成时，更新表单数据
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        name: userData.name || "",
+        age: userData.age || "",
+        height: userData.height || "",
+        weight: userData.weight || "",
+        goalWeight: userData.goalWeight || "",
+        activityLevel: userData.activityLevel || "moderate",
+        gender: userData.gender || "female"
+      });
+    }
+  }, [userData]);
+
+  // 处理表单提交
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await API.put("/api/users/profile", formData);
+      setIsEditing(false);
+      // 触发数据刷新
+      refreshMenstrual();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile");
+    }
+  };
+
+  if (loadingMenstrual || loadingUser) return <div>Loading...</div>;
+  if (errorMenstrual) return <div>Error: {errorMenstrual}</div>;
 
   return (
     <div className={`profile ${activeTab}-theme`}>
@@ -196,24 +298,19 @@ const Profile = ({ setProfileTab }) => {
         {activeTab === "sleep" && (
           <SleepChart
             showChart={true}
-            data={sleepData}
+            data={sleep}
             onDelete={fetchSleepData}
           />
         )}
         {activeTab === "weight" && (
-          <div className="health-section">
-            <h3 className="health-section-title">Weight Management Overview</h3>
-            <div className="health-chart">
-              <MealRecommender 
-                currentWeight={currentWeight || 65} 
-                goalWeight={goalWeight || 60}
-                height={height}
-                age={age}
-                gender="female"
-                activityLevel="moderate"
-              />
-            </div>
-          </div>
+          <MealRecommender 
+            currentWeight={currentWeight} 
+            goalWeight={goalWeight}
+            height={profileData?.height || height}
+            age={profileData?.age || age}
+            gender={profileData?.gender || "female"}
+            activityLevel={profileData?.activityLevel || "moderate"}
+          />
         )}
       </div>
     </div>

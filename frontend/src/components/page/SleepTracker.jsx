@@ -1,39 +1,62 @@
 // SleepTracker.jsx
-import React, { useEffect, useState } from "react";
-import SleepForm from "../chart/SleepForm";
+import React, { useState } from "react";
+import API from "../../api";
+import useDataCache from "../../hooks/useDataCache";
 import SleepChart from "../chart/SleepChart";
+import SleepForm from "../chart/SleepForm";
 import "../../styles/SleepTracker.css";
 
+const SleepTracker = () => {
+  // 本地UI状态
+  const [showForm, setShowForm] = useState(false);
 
-import API from "../../api";
+  // 使用 useDataCache 获取睡眠数据
+  const { data: sleepData, loading: loadingSleep, refresh } = useDataCache(
+    `sleep-data-${user?.uid}`,
+    async () => {
+      const res = await API.get("/api/sleep/me");
+      return res.data;
+    }
+  );
 
-const SleepTracker = ({ showChart = false }) => {
-  const [sleepRecords, setSleepRecords] = useState([]);
+  // 使用 useDataCache 获取睡眠建议
+  const { data: sleepAdvice, loading: loadingAdvice } = useDataCache(
+    `sleep-advice-${user?.uid}`,
+    async () => {
+      const res = await API.get("/api/sleep/advice");
+      return res.data;
+    }
+  );
 
-  const fetchSleepRecords = async () => {
+  // 处理睡眠记录删除
+  const handleDelete = async (id) => {
     try {
-      const res = await API.get(`/api/sleep/me`);
-      setSleepRecords(res.data);
-    } catch (err) {
-      console.error("Error fetching sleep data:", err);
+      await API.delete(`/api/sleep/${id}`);
+      // 触发数据刷新
+      refresh();
+    } catch (error) {
+      console.error("Error deleting sleep record:", error);
+      alert("Failed to delete sleep record");
     }
   };
 
-  useEffect(() => {
-    fetchSleepRecords();
-  },[]);
+  if (loadingSleep || loadingAdvice) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="sleep-tracker">
-      <div className="tracker-container">
-        <div className="form-section">
-        <SleepForm onSuccess={fetchSleepRecords} />
-        </div>
-        { showChart && (
-          <div className="chart-section">
-          <SleepChart data={sleepRecords}  onDelete={fetchSleepRecords} />
-        </div> )}
-      </div>
+      {showForm ? (
+        <SleepForm onSuccess={() => {
+          setShowForm(false);
+          refresh();
+        }} />
+      ) : (
+        <>
+          <button onClick={() => setShowForm(true)}>Add Sleep Record</button>
+          <SleepChart data={sleepData} onDelete={handleDelete} />
+        </>
+      )}
     </div>
   );
 };

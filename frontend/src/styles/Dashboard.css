@@ -24,12 +24,13 @@
   background: rgba(228, 109, 236, 0.253);
   padding: 20px;
   /* height: 80vh;  */
-  height: calc(100vh - 60px);
-  overflow-y: auto;
+  height: calc(100vh - 180px); /* 调整高度，留出足够空间 */
+  overflow-y: auto; /* 允许内容滚动 */
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   /* min-height: 60vh;  */
-
+  display: flex; /* 确保子元素可以正确布局 */
+  justify-content: center; /* 子元素居中 */
 }
 #root {
   width: 100%;
@@ -99,4 +100,5 @@
 }
 .weight-theme .content {
   background-color: #eef698; 
+  padding: 0; 
 }

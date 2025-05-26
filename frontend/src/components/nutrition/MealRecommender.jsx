@@ -3,7 +3,6 @@ import { format } from 'date-fns';
 import API from '../../api';
 import '../../styles/MealRecommender.css';
 import NutritionTipsPopup from './NutritionTipsPopup';
-import useDataCache from '../../hooks/useDataCache';
 
 // Food icon mapping
 const FOOD_ICONS = {
@@ -46,46 +45,75 @@ const MealRecommender = ({
   const [loading, setLoading] = useState(true);
   const [dietType, setDietType] = useState(dietPreference);
   const [apiStatus, setApiStatus] = useState({ success: true, message: "" });
-  const [selectedMeal, setSelectedMeal] = useState("breakfast");
-  const [preferences, setPreferences] = useState({
-    dietaryRestrictions: [],
-    allergies: [],
-    favoriteFoods: []
-  });
   
-  const { data: mealPlan, loading: mealPlanLoading, error: mealPlanError, refresh: refreshMealPlan } = useDataCache(
-    `meal-plan-${currentWeight}-${goalWeight}-${height}-${age}-${gender}-${activityLevel}-${dietType}`,
-    async () => {
+  // Generate meal recommendations
+  const fetchMealRecommendations = async () => {
+    try {
+      setLoading(true);
+      setApiStatus({ success: true, message: "" });
+      
+      console.log("Refreshing meal plan with params:", {
+        currentWeight,
+        goalWeight,
+        height,
+        age,
+        gender,
+        activityLevel,
+        dietPreference: dietType
+      });
+      
       const response = await API.get("/api/meal/recommendations", {
-        params: { currentWeight, goalWeight, height, age, gender, activityLevel, dietPreference: dietType }
+        params: {
+          currentWeight,
+          goalWeight,
+          height,
+          age,
+          gender,
+          activityLevel,
+          dietPreference: dietType
+        }
       });
-      return response.data;
-    }
-  );
-  
-  const { data: userPreferences, loading: loadingPreferences } = useDataCache(
-    `user-preferences-${user?.uid}`,
-    async () => {
-      const res = await API.get("/api/users/preferences");
-      return res.data;
-    }
-  );
-  
-  const { data: mealRecommendations, loading: loadingMeals } = useDataCache(
-    `meal-recommendations-${user?.uid}-${selectedMeal}`,
-    async () => {
-      const res = await API.post("/api/meals/recommend", {
-        mealType: selectedMeal,
-        preferences: userPreferences
+      
+      console.log("API response:", response);
+      
+      if (response.data) {
+        console.log("Meal plan data:", response.data);
+        console.log("Breakfast nutrition:", response.data.breakfast);
+        console.log("Lunch nutrition:", response.data.lunch);
+        console.log("Dinner nutrition:", response.data.dinner);
+        console.log("Snack nutrition:", response.data.snack);
+        console.log("Total macros:", response.data.macros);
+        
+        setCalorieNeeds(response.data.calorieNeeds);
+        setMacros(response.data.macros);
+        setDailyPlan({
+          date: response.data.date,
+          breakfast: response.data.breakfast,
+          lunch: response.data.lunch,
+          dinner: response.data.dinner,
+          snack: response.data.snack,
+          totalProtein: response.data.totalProtein,
+          totalCarbs: response.data.totalCarbs,
+          totalFat: response.data.totalFat,
+          totalCalories: response.data.totalCalories
+        });
+      } else {
+        throw new Error("Empty response from meal recommendation API");
+      }
+    } catch (error) {
+      console.error('Error fetching meal recommendations:', error);
+      console.error('Error details:', error.response ? error.response.data : 'No response data');
+      setApiStatus({
+        success: false,
+        message: `Could not fetch meal recommendations: ${error.message}. Please try again later.`
       });
-      return res.data;
-    },
-    [selectedMeal, userPreferences]
-  );
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Handle diet type change
   const handleDietTypeChange = async (newType, e) => {
-    // Prevent any event bubbling
     if (e) e.preventDefault();
     
     console.log(`Diet type button clicked: ${newType}`);
@@ -94,7 +122,6 @@ const MealRecommender = ({
       setDietType(newType);
       console.log(`Diet type changed to: ${newType}`);
       
-      //  when user changes diet type, save to backend
       try {
         setLoading(true);
         const response = await API.put("/api/meal/preferences", {
@@ -102,8 +129,7 @@ const MealRecommender = ({
         });
         console.log("Diet preference saved successfully:", response.data);
         
-        // After changing diet type, refresh the meal plan
-        await refreshMealPlan();
+        await fetchMealRecommendations();
       } catch (error) {
         console.error("Error saving diet preference:", error);
         setApiStatus({
@@ -120,37 +146,8 @@ const MealRecommender = ({
   
   // Load recommendations on initial load and when props change
   useEffect(() => {
-    refreshMealPlan();
+    fetchMealRecommendations();
   }, [currentWeight, goalWeight, height, age, gender, activityLevel, dietType]);
-  
-  // When user preferences load, update local state
-  useEffect(() => {
-    if (userPreferences) {
-      setPreferences(userPreferences);
-    }
-  }, [userPreferences]);
-  
-  // click "Refresh Meal Plan" button
-  const handleRefreshMealPlan = async (e) => {
-    // Prevent any event bubbling
-    if (e) e.preventDefault();
-    
-    console.log("Refresh Meal Plan button clicked!");
-    
-    try {
-      setLoading(true);
-      setApiStatus({ success: true, message: "" });
-      console.log(" refresh meal plan", { currentWeight, goalWeight, height, age, gender, activityLevel, dietType });
-      
-      await refreshMealPlan();
-    } catch (error) {
-      console.error("refresh meal plan error: ", error);
-      setApiStatus({
-        success: false,
-        message: `refresh meal plan failed: ${error.message}. please try again later.`
-      });
-    }
-  };
   
   // based on ingredient name to infer food type
   const getFoodTypeFromIngredient = (ingredient) => {
@@ -168,41 +165,41 @@ const MealRecommender = ({
     return 'default';
   };
   
-  if (loadingPreferences || loadingMeals) {
-    return <div className="meal-recommender-loading">Loading...</div>;
+  if (loading) {
+    return <div className="meal-recommender-loading">Generating your personalized meal plan...</div>;
   }
   
-  if (mealPlanError) {
-    return <div className="meal-recommender-error">Unable to generate meal plan. Please try again later.</div>;
+  if (!apiStatus.success) {
+    return <div className="meal-recommender-error">{apiStatus.message}</div>;
   }
   
   // Calculate total nutritional intake
-  const totalCalories = mealPlan.totalCalories || (
-    (mealPlan.breakfast.calories || 0) + 
-    (mealPlan.lunch.calories || 0) + 
-    (mealPlan.dinner.calories || 0) + 
-    (mealPlan.snack.calories || 0)
+  const totalCalories = dailyPlan.totalCalories || (
+    (dailyPlan.breakfast.calories || 0) + 
+    (dailyPlan.lunch.calories || 0) + 
+    (dailyPlan.dinner.calories || 0) + 
+    (dailyPlan.snack.calories || 0)
   );
                        
-  const totalProtein = mealPlan.totalProtein || (
-    (mealPlan.breakfast.protein || 0) + 
-    (mealPlan.lunch.protein || 0) + 
-    (mealPlan.dinner.protein || 0) + 
-    (mealPlan.snack.protein || 0)
+  const totalProtein = dailyPlan.totalProtein || (
+    (dailyPlan.breakfast.protein || 0) + 
+    (dailyPlan.lunch.protein || 0) + 
+    (dailyPlan.dinner.protein || 0) + 
+    (dailyPlan.snack.protein || 0)
   );
                       
-  const totalCarbs = mealPlan.totalCarbs || (
-    (mealPlan.breakfast.carbs || 0) + 
-    (mealPlan.lunch.carbs || 0) + 
-    (mealPlan.dinner.carbs || 0) + 
-    (mealPlan.snack.carbs || 0)
+  const totalCarbs = dailyPlan.totalCarbs || (
+    (dailyPlan.breakfast.carbs || 0) + 
+    (dailyPlan.lunch.carbs || 0) + 
+    (dailyPlan.dinner.carbs || 0) + 
+    (dailyPlan.snack.carbs || 0)
   );
                     
-  const totalFat = mealPlan.totalFat || (
-    (mealPlan.breakfast.fat || 0) + 
-    (mealPlan.lunch.fat || 0) + 
-    (mealPlan.dinner.fat || 0) + 
-    (mealPlan.snack.fat || 0)
+  const totalFat = dailyPlan.totalFat || (
+    (dailyPlan.breakfast.fat || 0) + 
+    (dailyPlan.lunch.fat || 0) + 
+    (dailyPlan.dinner.fat || 0) + 
+    (dailyPlan.snack.fat || 0)
   );
   
   // Render nutrition summary
@@ -338,13 +335,14 @@ const MealRecommender = ({
           <div className="diet-options-row">
             <span className="diet-type-label">Diet Type:</span>
             {renderDietTypeSelector()}
-            <button 
-              className="refresh-meal-plan" 
-              onClick={handleRefreshMealPlan}
-            >
-              <span role="img" aria-label="refresh">🔄</span> Refresh
-            </button>
           </div>
+          <button
+            className="refresh-meal-plan"
+            onClick={fetchMealRecommendations}
+            style={{ marginLeft: "10px" }}
+          >
+            <span role="img" aria-label="refresh">🔄</span> Refresh
+          </button>
         </div>
         
         {!apiStatus.success && (
@@ -357,10 +355,10 @@ const MealRecommender = ({
       {renderNutritionSummary()}
       
       <div className="meal-cards-row">
-        <MealCard meal={mealPlan.breakfast} title="Breakfast" type="breakfast" />
-        <MealCard meal={mealPlan.lunch} title="Lunch" type="lunch" />
-        <MealCard meal={mealPlan.dinner} title="Dinner" type="dinner" />
-        <MealCard meal={mealPlan.snack} title="Snack" type="snack" />
+        <MealCard meal={dailyPlan.breakfast} title="Breakfast" type="breakfast" />
+        <MealCard meal={dailyPlan.lunch} title="Lunch" type="lunch" />
+        <MealCard meal={dailyPlan.dinner} title="Dinner" type="dinner" />
+        <MealCard meal={dailyPlan.snack} title="Snack" type="snack" />
       </div>
       
       <NutritionTipsPopup />

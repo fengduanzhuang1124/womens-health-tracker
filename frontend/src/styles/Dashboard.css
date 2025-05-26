@@ -6,7 +6,7 @@
   overflow: hidden;
   justify-content: flex-start; 
   /* min-height: 100vh;  */
-  background-color: #f2c7e9;
+  background-color: #f8c8dc;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -47,15 +47,31 @@
 }
 .header-decor {
   position: absolute;
-  top: 40px;
-  left: 240px;
-  width: 150px;
-  height: auto;
-  z-index: 10; 
-   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  top: 60px;           /* 往下移远一点 */
+  left: 180px;         /* 往左移近一点 */
+  width: 110px;        /* 稍微缩小 */
+  height: 110px;
+  z-index: 10;
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13), 0 2px 8px rgba(0,0,0,0.08);
+  background: linear-gradient(145deg, #f8fafc 60%, #e0e7ef 100%);
+  padding: 8px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  animation: headerFloat 3s ease-in-out infinite;
+  object-fit: cover;
+  border: 2.5px solid #fff;
 }
 
+@keyframes headerFloat {
+  0%   { transform: translateY(0px) scale(1);}
+  50%  { transform: translateY(-8px) scale(1.04);}
+  100% { transform: translateY(0px) scale(1);}
+}
+
+.header-decor:hover {
+  box-shadow: 0 16px 32px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.12);
+  transform: scale(1.08) rotate(-4deg);
+}
 .weight-theme .nav-bar button {
   background-color: #fbc02d;
 }
@@ -99,6 +115,16 @@
   background-color: #ffb74d;
 }
 .weight-theme .content {
-  background-color: #eef698; 
+  background-color: #fff9c4; 
   padding: 0; 
+}
+
+
+
+.dashboard.sleep-theme {
+  background:#cce4f7; 
+  
+}
+.dashboard.weight-theme {
+  background: #eef698;
 }

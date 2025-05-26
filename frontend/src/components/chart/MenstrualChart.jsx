@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { durationAdvice, cycleAdvice } from "../../data/menstrualAdvice";
-import { getGPTAdvice } from "../utils/getCPTAdvice";
+import API from "../../api";
+import cup from "../../assets/cup.png";
 
 import {
   LineChart,
@@ -16,14 +16,23 @@ const MenstrualChart = ({ data, avgCycleLength  }) => {
 
  
   const validData = Array.isArray(data)
-    ? data.filter(
+  ? data
+      .filter(
         (item) =>
           item &&
           typeof item.duration === "number" &&
           !isNaN(item.duration) &&
-          typeof item.month === "string"
+          item.startDate 
       )
-    : [];
+      .map((item) => ({
+        ...item,
+        month: new Date(item.startDate).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+      }))
+  : [];
     
 
   if (validData.length === 0) {
@@ -55,23 +64,27 @@ const MenstrualChart = ({ data, avgCycleLength  }) => {
   //   validData.reduce((sum, d) => sum + (d.cycleLength || 28), 0) / validData.length
   // );
   // get health information
-  const durationTips =
-    durationAdvice.find((d) => d.condition(averageDuration))?.tips || [];
-  const cycleTips =
-    cycleAdvice.find((c) => c.condition(avgCycleLength))?.tips || [];
+  // const durationTips =
+  //   durationAdvice.find((d) => d.condition(averageDuration))?.tips || [];
+  // const cycleTips =
+  //   cycleAdvice.find((c) => c.condition(avgCycleLength))?.tips || [];
 
-  const allTips = [...durationTips, ...cycleTips];
+  // const allTips = [...durationTips, ...cycleTips];
 
   const [aiAdvice, setAiAdvice]= useState("Generating AI suggestion.....")
  
     useEffect(() => {
       if (validData.length > 0) {
-        getGPTAdvice(avgCycleLength, averageDuration).then(setAiAdvice);
+        API.post("/api/ai-advice", {
+          cycle: avgCycleLength,
+          duration: averageDuration
+        }).then(res => setAiAdvice(res.data.advice || "No advice available."))
+        .catch(() => setAiAdvice("Failed to get AI advice."));
       }
     }, [avgCycleLength, averageDuration]);
   return (
     <div className="health-section">
-      <h3>📊 Menstrual Duration Trends</h3>
+      <h3><img src={cup} alt="decor" className="smallsign" />  Menstrual Duration Trends</h3>
       <ResponsiveContainer width="100%" height={250}>
         <LineChart data={validData}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -92,9 +105,9 @@ const MenstrualChart = ({ data, avgCycleLength  }) => {
     <ul>
       <li>Average period duration: {averageDuration} days</li>
       <li>Average cycle length: {avgCycleLength} days</li>
-      {allTips.map((tip, idx) => (
+      {/* {allTips.map((tip, idx) => (
         <li key={idx}>{tip}</li>
-      ))}
+      ))} */}
     </ul>
   </div>
 

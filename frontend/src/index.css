@@ -81,3 +81,50 @@ button:focus-visible {
 .profile-theme-body {
  background-color: #fff2b2; 
 }
+.smallsign {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;           /* 圆角 */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18), 0 1.5px 4px rgba(0,0,0,0.10); /* 阴影 */
+  background: linear-gradient(145deg, #f8fafc 60%, #e0e7ef 100%);
+  display: inline-block;
+  object-fit: cover;
+  border: 2.5px solid #fff;
+  margin-right: 12px;
+  /* 3D浮雕感 */
+  filter: drop-shadow(0 2px 6px #b6c6e0);
+  /* 浮动动画 */
+  animation: floaty 2.5s ease-in-out infinite;
+  transition: transform 0.2s;
+}
+
+@keyframes floaty {
+  0%   { transform: translateY(0px) scale(1);}
+  50%  { transform: translateY(-10px) scale(1.05);}
+  100% { transform: translateY(0px) scale(1);}
+}
+
+.smallsign:hover {
+  transform: scale(1.12) rotate(-6deg);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.13);
+}
+
+.menstrual-theme-body,
+.menstrual-theme {
+  color: #b8004c; /* 深粉色，适合粉色背景 */
+}
+
+.sleep-theme-body,
+.sleep-theme {
+  color: #1a237e; /* 深蓝色，适合浅蓝背景 */
+}
+
+.weight-theme-body,
+.weight-theme {
+  color: #7a5c00; /* 深金色/棕色，适合浅黄背景 */
+}
+
+.profile-theme-body,
+.profile-theme {
+  color: #7a5c00; /* 同 weight，适合浅黄背景 */
+}

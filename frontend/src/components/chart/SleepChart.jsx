@@ -10,7 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
+import parttwo from "../../assets/parttwo.png";
 /**
  * SleepChart Component - Displays sleep data visualization and personalized recommendations
  *
@@ -322,7 +322,7 @@ const SleepChart = ({ data, onDelete }) => {
     <div className="sleep-ai-layout">
       {/* Sleep chart and records section */}
       <div className="chart-left">
-        <h3>🕗 Sleep Trends</h3>
+        <h3><img src={parttwo} alt="decor" className="smallsign" />  Sleep Trends</h3>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={sortedData}>
             <CartesianGrid strokeDasharray="3 3" />

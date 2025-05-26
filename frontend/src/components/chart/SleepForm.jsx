@@ -7,7 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/SleepForm.css";
 import { PieChart, Pie, Cell } from "recharts";
 registerLocale("en-GB", enGB);
-
+import parttwo from "../../assets/parttwo.png";
 const SleepForm = ({ onSuccess }) => {
   const [sleepTime, setSleepTime] = useState("");
   const [wakeTime, setWakeTime] = useState("");
@@ -23,7 +23,9 @@ const SleepForm = ({ onSuccess }) => {
     const saved = localStorage.getItem("sleep_analysis");
     return saved ? JSON.parse(saved) : null;
   });
-  const [aiAdvice, setAiAdvice] = useState(null);
+  const [aiAdvice, setAiAdvice] = useState(() => {
+    return localStorage.getItem("sleep_ai_advice") || null;
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,7 +74,7 @@ const SleepForm = ({ onSuccess }) => {
         activity,
       });
       console.log("AI returned:", res.data); 
-      setAiAdvice(res.data.advice);
+      saveAiAdvice(res.data.advice);
     } catch (err) {
       setAiAdvice("⚠️ Failed to load AI suggestion.");
       console.error("AI advice error:", err);
@@ -117,10 +119,17 @@ const SleepForm = ({ onSuccess }) => {
     return "low-score";
   };
 
+  const saveAiAdvice = (advice) => {
+    setAiAdvice(advice);
+    localStorage.setItem("sleep_ai_advice", advice || "");
+  };
+
+  
+
   return (
     <div className="sleep-form-layout-grid">
       <form className="sleep-form" onSubmit={handleSubmit}>
-        <h3>🛌 Record Sleep</h3>
+        <h3>  <img src={parttwo} alt="decor" className="smallsign" />  Record Sleep</h3>
 
         <label>Sleep Time:</label>
         <DatePicker
@@ -158,7 +167,7 @@ const SleepForm = ({ onSuccess }) => {
 {isDuplicateDate && (
   <div className="duplicate-warning">
     <span className="emoji">😴💤</span>
-    You’ve already added a sleep record for this date.
+    You've already added a sleep record for this date.
   </div>
 )}
 {invalidTimeRange && (

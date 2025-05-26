@@ -3,8 +3,7 @@ import { format } from "date-fns";
 import WeightTrendChart from "../chart/WeightTrendChart";
 import API from "../../api";
 import "../../styles/WeightTracker.css";
-import useDataCache from "../../hooks/useDataCache";
-
+import partthree from "../../assets/partthree.png";
 const WeightTracker = () => {
   // States
   const [weights, setWeights] = useState([]);
@@ -14,6 +13,8 @@ const WeightTracker = () => {
   const [newWeight, setNewWeight] = useState("");
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [viewMode, setViewMode] = useState("daily");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   const [showFoodEntry, setShowFoodEntry] = useState(false);
   const [foodName, setFoodName] = useState("");
@@ -26,8 +27,8 @@ const WeightTracker = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   
-  // 用户档案数据
-  const [height, setHeight] = useState(165); // in cm (不再是常量)
+  // User profile data
+  const [height, setHeight] = useState(165);
   const [age, setAge] = useState(30);
   const [gender, setGender] = useState("female");
   const [activityLevel, setActivityLevel] = useState("moderate");
@@ -35,41 +36,8 @@ const WeightTracker = () => {
   // BMI calculation
   const [bmi, setBmi] = useState(null);
   
-  const { data: weightsData, loading: loadingWeights } = useDataCache(
-    `weight-data-${user?.uid}`,
-    async () => {
-      const res = await API.get("/api/weight");
-      return res.data;
-    }
-  );
-  
-  const { data: profileData, loading: loadingProfile } = useDataCache(
-    `profile-data-${user?.uid}`,
-    async () => {
-      const res = await API.get("/api/users/me/profile");
-      return res.data;
-    }
-  );
-  
-  const { data: goalData, loading: loadingGoal } = useDataCache(
-    `goal-data-${user?.uid}`,
-    async () => {
-      const res = await API.get("/api/weight/goal");
-      return res.data;
-    }
-  );
-  
-  const { data: foodData, loading: loadingFood } = useDataCache(
-    `food-data-${user?.uid}-${format(new Date(), "yyyy-MM-dd")}`,
-    async () => {
-      const res = await API.get(`/api/weight/food?date=${format(new Date(), "yyyy-MM-dd")}`);
-      return res.data;
-    }
-  );
-  
   useEffect(() => {
     if (currentWeight) {
-      // 将身高从cm转换为m进行BMI计算
       const heightInMeters = height / 100;
       const calculatedBmi = (currentWeight / (heightInMeters * heightInMeters)).toFixed(1);
       setBmi(calculatedBmi);
@@ -79,6 +47,7 @@ const WeightTracker = () => {
   // Fetch weight data
   const fetchWeights = async () => {
     try {
+      setLoading(true);
       console.log("Fetching weight data from API...");
       const response = await API.get("/api/weight");
       console.log("Weight API response:", response.data);
@@ -93,17 +62,19 @@ const WeightTracker = () => {
           console.log("Initial weight set to:", response.data[response.data.length - 1].weight);
         } else {
           console.log("No weight records found in API response");
-        //  loading the demo data to display the chart
           loadDemoData();
         }
       } else {
         console.error("Invalid weight data format from API", response.data);
         loadDemoData();
       }
+      setError(null);
     } catch (error) {
       console.error("Error fetching weights:", error);
-        //   loading the demo data when the API request fails
+      setError("Failed to fetch weight data");
       loadDemoData();
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -392,20 +363,8 @@ const WeightTracker = () => {
     }
   };
   
-  // 从缓存数据中提取需要的值
-  const currentWeightFromCache = weightsData?.[0]?.weight;
-  const initialWeightFromCache = weightsData?.[weightsData.length - 1]?.weight;
-  const goalWeightFromCache = goalData?.goalWeight;
-  const heightFromCache = profileData?.height || 165;
-  const ageFromCache = profileData?.age || 30;
-  const genderFromCache = profileData?.gender || "female";
-  const activityLevelFromCache = profileData?.activityLevel || "moderate";
-  const dailyFoodsFromCache = foodData?.[0]?.foods || [];
-  
-  // 渲染部分
-  if (loadingWeights || loadingProfile || loadingGoal || loadingFood) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="wt-container">
@@ -417,6 +376,7 @@ const WeightTracker = () => {
           >
             Daily View
           </button>
+          <img src={partthree} alt="decor" className="smallsign" />
           <button 
             className={viewMode === "monthly" ? "wt-toggle-btn wt-active" : "wt-toggle-btn"} 
             onClick={() => setViewMode("monthly")}
@@ -431,17 +391,17 @@ const WeightTracker = () => {
             <div className="wt-stat-item">
               <span className="wt-stat-icon">⚖️</span>
               <span className="wt-stat-label">Current</span>
-              <span className="wt-stat-value">{currentWeightFromCache ? `${currentWeightFromCache} kg` : "No data"}</span>
+              <span className="wt-stat-value">{currentWeight ? `${currentWeight} kg` : "No data"}</span>
             </div>
             <div className="wt-stat-item">
               <span className="wt-stat-icon">🕰️</span>
               <span className="wt-stat-label">Initial</span>
-              <span className="wt-stat-value">{initialWeightFromCache ? `${initialWeightFromCache} kg` : "No data"}</span>
+              <span className="wt-stat-value">{initialWeight ? `${initialWeight} kg` : "No data"}</span>
             </div>
             <div className="wt-stat-item">
               <span className="wt-stat-icon">🎯</span>
               <span className="wt-stat-label">Goal</span>
-              <span className="wt-stat-value">{goalWeightFromCache ? `${goalWeightFromCache} kg` : "Not set"}</span>
+              <span className="wt-stat-value">{goalWeight ? `${goalWeight} kg` : "Not set"}</span>
             </div>
             <div className="wt-stat-item">
               <span className="wt-stat-icon">➡️</span>
@@ -461,7 +421,7 @@ const WeightTracker = () => {
         {/* Main section with chart */}
         <div className="wt-main-panel">
           <div className="wt-chart-section">
-            <WeightTrendChart data={getFilteredData()} viewMode={viewMode} goalWeight={parseFloat(goalWeightFromCache)} />
+            <WeightTrendChart  key={showHistory + '-' + showProfileSettings} data={getFilteredData()} viewMode={viewMode} goalWeight={parseFloat(goalWeight)} />
           </div>
           
           {/* Input Forms Row */}
@@ -494,7 +454,7 @@ const WeightTracker = () => {
                 <input
                   type="number"
                   step="0.1"
-                  value={goalWeightFromCache || ""}
+                  value={goalWeight || ""}
                   onChange={(e) => setGoalWeight(e.target.value)}
                   placeholder="Enter goal weight (kg)"
                   className="wt-input"
@@ -552,7 +512,7 @@ const WeightTracker = () => {
                     <label>Height (cm)</label>
                     <input
                       type="number"
-                      value={heightFromCache}
+                      value={height}
                       onChange={(e) => setHeight(Number(e.target.value))}
                       placeholder="Height in cm"
                       className="wt-input"
@@ -564,7 +524,7 @@ const WeightTracker = () => {
                     <label>Age</label>
                     <input
                       type="number"
-                      value={ageFromCache}
+                      value={age}
                       onChange={(e) => setAge(Number(e.target.value))}
                       placeholder="Age in years"
                       className="wt-input"
@@ -577,7 +537,7 @@ const WeightTracker = () => {
                   <div className="wt-profile-form-group">
                     <label>Gender</label>
                     <select 
-                      value={genderFromCache} 
+                      value={gender} 
                       onChange={(e) => setGender(e.target.value)}
                       className="wt-input"
                       required
@@ -591,7 +551,7 @@ const WeightTracker = () => {
                   <div className="wt-profile-form-group">
                     <label>Activity Level</label>
                     <select 
-                      value={activityLevelFromCache} 
+                      value={activityLevel} 
                       onChange={(e) => setActivityLevel(e.target.value)}
                       className="wt-input"
                       required
@@ -618,9 +578,9 @@ const WeightTracker = () => {
             
             {!showFoodEntry ? (
               <div className="wt-daily-foods-mini">
-                {dailyFoodsFromCache.length > 0 ? (
+                {dailyFoods.length > 0 ? (
                   <div className="wt-food-list-mini">
-                    {dailyFoodsFromCache.map((food, index) => (
+                    {dailyFoods.map((food, index) => (
                       <div key={index} className="wt-food-item-mini">
                         {food.name} ({food.calories} cal)
                         <span className={food.isHealthy ? "wt-mini-tag wt-healthy" : "wt-mini-tag wt-unhealthy"}>

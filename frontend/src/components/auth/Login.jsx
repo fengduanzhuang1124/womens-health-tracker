@@ -4,7 +4,7 @@ import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 
 import { useNavigate } from "react-router-dom";
 import "../../styles/LoginRegister.css";
 import API from "../../api";
-import headerDecor from "../../assets/avatar-girl.png"; 
+import headerDecor from "../../assets/signcat.gif"; 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

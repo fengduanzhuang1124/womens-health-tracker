@@ -1,35 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // import axios from "axios";
 import API from "../../api";
-//import { db } from "../../firebase";
+import { db } from "../../firebase";
 //import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../../styles/MenstrualTracker.css";
 import moment from "moment";
-import useDataCache from "../../hooks/useDataCache";
 import cute from "../../assets/cute.png";
 import moon from "../../assets/moon.png";
 import catsmeil from "../../assets/catsmeil.png";
-import "../../styles/common.css";
+import cup from "../../assets/cup.png";
 moment.locale("en-gb");
 
 const MenstrualTracker = () => {
+  const [nextPeriodDays, setNextPeriodDays] = useState(null);
+  const [cycleLength, setCycleLength] = useState(28);
+  const [calendarData, setCalendarData] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [periodHistory, setPeriodHistory] = useState([]);
   const [tempStartDate, setTempStartDate] = useState(null);
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const { 
-    data: menstrualData, 
-    loading, 
-    error, 
-    refresh 
-  } = useDataCache(
-    'menstrual-data',
-    async () => {
+  // Get data when the component loads
+  useEffect(() => {
+    fetchMenstrualData();
+  }, []);
+
+  // get data from Firestore
+  const fetchMenstrualData = async () => {
+    try {
+      setLoading(true);
       const res = await API.get("/api/menstrual/me");
-      return res.data;
+      const { data, calendarData, nextPeriodDays, cycleLength } = res.data;
+
+      setPeriodHistory(data);
+      setCalendarData(calendarData);
+      setNextPeriodDays(nextPeriodDays);
+      setCycleLength(cycleLength);
+
+      // Chart transform data
+      const chartPoints = data.map((period) => ({
+        month: new Date(period.startDate).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+        duration: period.duration || 0,
+        cycleLength: period.cycleLength || cycleLength,
+      }));
+      setChartData(chartPoints);
+      setError(null);
+    } catch (error) {
+      console.error("Failed to fetch menstrual data:", error);
+      setError("Failed to fetch menstrual data");
+    } finally {
+      setLoading(false);
     }
-  );
+  };
 
   if (loading) {
     return <div className="loading">Loading menstrual data...</div>;
@@ -38,18 +68,11 @@ const MenstrualTracker = () => {
   if (error) {
     return (
       <div className="error">
-        Error loading data: {error}
-        <button onClick={refresh}>Retry</button>
+        Error loading data. Please try again.
+        <button onClick={fetchMenstrualData}>Retry</button>
       </div>
     );
   }
-
-  const {
-    data = [],
-    calendarData = [],
-    nextPeriodDays,
-    cycleLength = 28
-  } = menstrualData || {};
 
   // Handling Calendar Clicks
   const handleCalendarClick = (date) => {
@@ -84,8 +107,7 @@ const MenstrualTracker = () => {
 
       alert("Period data saved!");
       setTempStartDate(null);
-      // Retrieve data
-      refresh();
+      fetchMenstrualData();
     } catch (error) {
       console.error("Error saving period data:", error);
       alert(
@@ -107,20 +129,20 @@ const MenstrualTracker = () => {
 
       await API.delete(`/api/menstrual/${recordId}`);
       alert("Menstrual record deleted!");
-      refresh(); // Refresh UI
+      fetchMenstrualData();
     } catch (error) {
       console.error("Deletion failed:", error);
       alert("Deletion failed, please check the network or backend service");
     }
   };
-  console.log("📊 chartData:", data);
+  console.log("📊 chartData:", chartData);
 
   return (
     <div className="menstrual-tracker">
       <div className="tracker-container">
         {/* calender */}
         <div className="calendar-section">
-          <h3>Menstrual Calendar</h3>
+          <h3><img src={cup} alt="decor" className="smallsign" /> Menstrual Calendar</h3>
           <Calendar
             locale="en-US"
             onClickDay={handleCalendarClick}
@@ -175,8 +197,8 @@ const MenstrualTracker = () => {
           <h4>Average Cycle: {cycleLength} days</h4>
 
           <div className="history-list">
-            {data.length > 0 ? (
-              data.map((period, index) => (
+            {periodHistory.length > 0 ? (
+              periodHistory.map((period, index) => (
                 <div key={index} className="history-item">
                   <img src={moon} alt="moon" className="moon-icon" />
                   <div className="record-info">

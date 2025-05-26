@@ -1,13 +1,14 @@
-// src/components/page/Dashboard.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
-import MenstrualTracker from "./MenstrualTracker";
-import SleepTracker from "./SleepTracker";
-import WeightTracker from "./weightTracker";
-import Profile from "./Profile";
 import "../../styles/Dashboard.css";
-import headerDecor from "../../assets/avatar-girl.png";
+import headerDecor from "../../assets/avatar-girl.gif";
+
+
+const MenstrualTracker = lazy(() => import("./MenstrualTracker"));
+const SleepTracker = lazy(() => import("./SleepTracker"));
+const WeightTracker = lazy(() => import("./weightTracker"));
+const Profile = lazy(() => import("./Profile"));
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -37,23 +38,16 @@ const Dashboard = () => {
   }, [effectiveTheme]);
 
   const renderContent = () => {
-    switch (activeTab) {
-      case "menstrual":
-        return <MenstrualTracker />;
-      case "sleep":
-        return <SleepTracker showChart={false} />;
-      case "weight":
-        return <WeightTracker />;
-      case "profile":
-        return (
-          <Profile 
-            themeColor={effectiveTheme} 
-            setProfileTab={setProfileTab} 
-          />
-        );
-      default:
-        return null;
-    }
+    return (
+      <Suspense fallback={<div className="loading">Loading...</div>}>
+        {activeTab === "menstrual" && <MenstrualTracker key="menstrual" />}
+        {activeTab === "sleep" && <SleepTracker key="sleep" showChart={false} />}
+        {activeTab === "weight" && <WeightTracker key="weight" />}
+        {activeTab === "profile" && (
+          <Profile key="profile" themeColor={effectiveTheme} setProfileTab={setProfileTab} />
+        )}
+      </Suspense>
+    );
   };
 
   return (
@@ -93,9 +87,7 @@ const Dashboard = () => {
             </button>
           </div>
 
-          <div className="content">
-            {renderContent()}
-          </div>
+          <div className="content">{renderContent()}</div>
 
           <button
             className="logout"

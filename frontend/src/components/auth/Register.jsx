@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
  import { createUserWithEmailAndPassword ,GoogleAuthProvider, signInWithPopup } from "firebase/auth";
  import "../../styles/LoginRegister.css";
  import API from "../../api";
- import headerDecor from "../../assets/avatar-girl.png"; 
+ import headerDecor from "../../assets/signcat.gif"; 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

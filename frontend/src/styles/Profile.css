@@ -5,6 +5,7 @@
     text-align: center;
     box-shadow: 0 4px 10px rgba(255, 182, 193, 0.4);
     font-family: 'Comic Sans MS', 'Segoe UI', cursive;
+
   }
   
   .health-nav {
@@ -33,7 +34,7 @@
   .health-content {
     overflow: auto;
     width: 100%; 
-    max-height: 80vh; 
+    /* max-height: 80vh;  */
     display: flex;
     justify-content: center;
   }
@@ -116,12 +117,14 @@
 
 .menstrual-theme {
   background-color: #f8c8dc; 
+ 
 }
 .sleep-theme {
   background-color: #cce4f7; 
+ 
 }
 .weight-theme {
-  background-color: #fff2b2; 
+  background-color: #fff9c4; 
 }
 
 /* Navigation button color uniform change */
@@ -167,15 +170,18 @@
   z-index: 999;
   text-align: center;
   transition: background-color 0.5s ease;
+  
 }
 
 
 .profile-info.menstrual-theme {
   background-color: #f8c8dc; 
+  overflow-y: auto;
 }
 
 .profile-info.sleep-theme {
   background-color: #cce4f7; 
+  overflow-y: auto;
 }
 
 .profile-info.weight-theme {
@@ -243,4 +249,7 @@
 
 .profile-info {
   animation: slideIn 0.3s ease-out;
+  overflow: auto;
 }
+
+
